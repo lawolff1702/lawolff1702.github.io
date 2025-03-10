@@ -248,7 +248,7 @@ window.Quarto = {
 <section id="data-and-feature-selection" class="level1">
 <h1>Data and Feature Selection</h1>
 <p>We are using the <code>folkables</code> package to access data from the 2018 American Community Survey’s Public Use Microdata Sample (PUMS) for the state of Georgia.</p>
-<div id="cell-4" class="cell" data-execution_count="5">
+<div id="cell-4" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> folktables <span class="im">import</span> ACSDataSource, ACSEmployment, BasicProblem, adult_filter</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -261,10 +261,7 @@ window.Quarto = {
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>acs_data <span class="op">=</span> data_source.get_data(states<span class="op">=</span>[STATE], download<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>acs_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Downloading data for 2018 1-Year person survey for GA...</code></pre>
-</div>
-<div class="cell-output cell-output-display" data-execution_count="5">
+<div class="cell-output cell-output-display" data-execution_count="1">
 <div>
 
 
@@ -424,10 +421,10 @@ window.Quarto = {
 </div>
 </div>
 <p>This data set contains a large amount of features for each individual, so we are going to narrow it down to only those that we may use to train our model.</p>
-<div id="cell-6" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>possible_features<span class="op">=</span>[<span class="st">'AGEP'</span>, <span class="st">'SCHL'</span>, <span class="st">'MAR'</span>, <span class="st">'RELP'</span>, <span class="st">'DIS'</span>, <span class="st">'ESP'</span>, <span class="st">'CIT'</span>, <span class="st">'MIG'</span>, <span class="st">'MIL'</span>, <span class="st">'ANC'</span>, <span class="st">'NATIVITY'</span>, <span class="st">'DEAR'</span>, <span class="st">'DEYE'</span>, <span class="st">'DREM'</span>, <span class="st">'SEX'</span>, <span class="st">'RAC1P'</span>, <span class="st">'ESR'</span>]</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>acs_data[possible_features].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="7">
+<div id="cell-6" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>possible_features<span class="op">=</span>[<span class="st">'AGEP'</span>, <span class="st">'SCHL'</span>, <span class="st">'MAR'</span>, <span class="st">'RELP'</span>, <span class="st">'DIS'</span>, <span class="st">'ESP'</span>, <span class="st">'CIT'</span>, <span class="st">'MIG'</span>, <span class="st">'MIL'</span>, <span class="st">'ANC'</span>, <span class="st">'NATIVITY'</span>, <span class="st">'DEAR'</span>, <span class="st">'DEYE'</span>, <span class="st">'DREM'</span>, <span class="st">'SEX'</span>, <span class="st">'RAC1P'</span>, <span class="st">'ESR'</span>]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>acs_data[possible_features].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
 <div>
 
 
@@ -568,25 +565,25 @@ window.Quarto = {
 <li><code>SEX</code> is binary sex (<code>1</code> for male, <code>2</code> for female)</li>
 </ul>
 <p>Now we select for the features we want to use and we will be able to constuct a <code>BasicProblem</code> that expresses our desire to use these features to predict employment status <code>ESR</code>, using <code>RAC1P</code> as the group label.</p>
-<div id="cell-10" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>features_to_use <span class="op">=</span> [f <span class="cf">for</span> f <span class="kw">in</span> possible_features <span class="cf">if</span> f <span class="kw">not</span> <span class="kw">in</span> [<span class="st">"ESR"</span>, <span class="st">"RAC1P"</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-10" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>features_to_use <span class="op">=</span> [f <span class="cf">for</span> f <span class="kw">in</span> possible_features <span class="cf">if</span> f <span class="kw">not</span> <span class="kw">in</span> [<span class="st">"ESR"</span>, <span class="st">"RAC1P"</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-11" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>EmploymentProblem <span class="op">=</span> BasicProblem(</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    features<span class="op">=</span>features_to_use,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    target<span class="op">=</span><span class="st">'ESR'</span>,</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    target_transform<span class="op">=</span><span class="kw">lambda</span> x: x <span class="op">==</span> <span class="dv">1</span>,</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    group<span class="op">=</span><span class="st">'RAC1P'</span>,</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    preprocess<span class="op">=</span><span class="kw">lambda</span> x: x,</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    postprocess<span class="op">=</span><span class="kw">lambda</span> x: np.nan_to_num(x, <span class="op">-</span><span class="dv">1</span>),</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>features, label, group <span class="op">=</span> EmploymentProblem.df_to_numpy(acs_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-11" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>EmploymentProblem <span class="op">=</span> BasicProblem(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    features<span class="op">=</span>features_to_use,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    target<span class="op">=</span><span class="st">'ESR'</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    target_transform<span class="op">=</span><span class="kw">lambda</span> x: x <span class="op">==</span> <span class="dv">1</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    group<span class="op">=</span><span class="st">'RAC1P'</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    preprocess<span class="op">=</span><span class="kw">lambda</span> x: x,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    postprocess<span class="op">=</span><span class="kw">lambda</span> x: np.nan_to_num(x, <span class="op">-</span><span class="dv">1</span>),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>features, label, group <span class="op">=</span> EmploymentProblem.df_to_numpy(acs_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We now have a feature matrix <code>features</code>, a label vector <code>label</code>, and a group label vector <code>group</code>.</p>
-<div id="cell-13" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> obj <span class="kw">in</span> [features, label, group]:</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(obj.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-13" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> obj <span class="kw">in</span> [features, label, group]:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(obj.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>(100855, 15)
 (100855,)
@@ -594,25 +591,25 @@ window.Quarto = {
 </div>
 </div>
 <p>We are now going to split our data into a training set and a testing set:</p>
-<div id="cell-15" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test, group_train, group_test <span class="op">=</span> train_test_split(</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    features, label, group, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-15" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test, group_train, group_test <span class="op">=</span> train_test_split(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    features, label, group, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="data-exploration" class="level1">
 <h1>Data Exploration</h1>
 <p>Before we dive straight into model training, lets take a deeper look at our data.</p>
-<div id="cell-18" class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(X_train, columns <span class="op">=</span> features_to_use)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"group"</span>] <span class="op">=</span> group_train</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"label"</span>] <span class="op">=</span> y_train</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-18" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(X_train, columns <span class="op">=</span> features_to_use)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"group"</span>] <span class="op">=</span> group_train</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"label"</span>] <span class="op">=</span> y_train</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here is a quick look at our data frame containing our training data:</p>
-<div id="cell-20" class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="18">
+<div id="cell-20" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
 <div>
 
 
@@ -746,32 +743,32 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<div id="cell-21" class="cell" data-execution_count="24">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="24">
+<div id="cell-21" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>80684</code></pre>
 </div>
 </div>
 <p>This data set contains information from <span class="math inline">\(80684\)</span> individuals in the state of Georgia.</p>
-<div id="cell-23" class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"label"</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="63">
+<div id="cell-23" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"label"</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
 <pre><code>label
 False    44664
 True     36020
 Name: count, dtype: int64</code></pre>
 </div>
 </div>
-<div id="cell-24" class="cell" data-execution_count="58">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'label'</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="58">
+<div id="cell-24" class="cell" data-execution_count="78">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'label'</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="78">
 <pre><code>np.float64(0.44643299786822666)</code></pre>
 </div>
 </div>
-<p>Of these individuals, 44.64% or <span class="math inline">\(44664\)</span> individuals are employed.</p>
-<div id="cell-26" class="cell" data-execution_count="62">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'group'</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="62">
+<p>Of these individuals, 44.64% or <span class="math inline">\(36020\)</span> individuals are employed.</p>
+<div id="cell-26" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'group'</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>group
 1    53302
 2    20239
@@ -784,9 +781,9 @@ Name: count, dtype: int64</code></pre>
 Name: count, dtype: int64</code></pre>
 </div>
 </div>
-<div id="cell-27" class="cell" data-execution_count="65">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'group'</span>].value_counts(normalize<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="65">
+<div id="cell-27" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'group'</span>].value_counts(normalize<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
 <pre><code>group
 1    0.660627
 2    0.250843
@@ -800,9 +797,9 @@ Name: proportion, dtype: float64</code></pre>
 </div>
 </div>
 <p>The two largest racial groups are <code>1</code> White Alone with 53302 individuals making up 66% of the data, and <code>2</code> Black/African American Alone with 20239 individuals making up 25% of the data.</p>
-<div id="cell-29" class="cell" data-execution_count="64">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>df.groupby(<span class="st">'group'</span>)[<span class="st">'label'</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="64">
+<div id="cell-29" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>df.groupby(<span class="st">'group'</span>)[<span class="st">'label'</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
 <pre><code>group
 1    0.460771
 2    0.416127
@@ -816,33 +813,33 @@ Name: label, dtype: float64</code></pre>
 </div>
 </div>
 <p>~46% of White Alone individuals are employed and ~42% of Black/African American Alone individuals are employed.</p>
-<div id="cell-31" class="cell" data-execution_count="66">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>sns.set_theme(style<span class="op">=</span><span class="st">"whitegrid"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-31" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>sns.set_theme(style<span class="op">=</span><span class="st">"whitegrid"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-32" class="cell" data-execution_count="73">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_intersection(df, col1<span class="op">=</span><span class="st">'group'</span>, col2<span class="op">=</span><span class="st">'sex'</span>):</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    prop_df <span class="op">=</span> df.groupby([col1, col2])[<span class="st">'label'</span>].mean().reset_index()</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    plt.figure(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">4</span>))</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    ax <span class="op">=</span> sns.barplot(x<span class="op">=</span>col1, y<span class="op">=</span><span class="st">'label'</span>, hue<span class="op">=</span>col2, data<span class="op">=</span>prop_df)</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f'Employment Proportion by </span><span class="sc">{</span>col1<span class="sc">}</span><span class="ss"> and </span><span class="sc">{</span>col2<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(col1)</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="ss">f'Employment Proportion (%)'</span>)</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> ax.patches:</span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>        ax.annotate(<span class="ss">f'</span><span class="sc">{</span>p<span class="sc">.</span>get_height()<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">'</span>, </span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>                   (p.get_x() <span class="op">+</span> p.get_width() <span class="op">/</span> <span class="fl">2.</span>, p.get_height()),</span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>                   ha <span class="op">=</span> <span class="st">'center'</span>, va <span class="op">=</span> <span class="st">'bottom'</span>,</span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>                   xytext <span class="op">=</span> (<span class="dv">0</span>, <span class="dv">5</span>), textcoords <span class="op">=</span> <span class="st">'offset points'</span>)</span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
-<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
-<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>group_sex <span class="op">=</span> plot_intersection(df, <span class="st">'group'</span>, <span class="st">'SEX'</span>)</span>
-<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>    </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="cell-32" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_intersection(df, col1<span class="op">=</span><span class="st">'group'</span>, col2<span class="op">=</span><span class="st">'sex'</span>):</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    prop_df <span class="op">=</span> df.groupby([col1, col2])[<span class="st">'label'</span>].mean().reset_index()</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    ax <span class="op">=</span> sns.barplot(x<span class="op">=</span>col1, y<span class="op">=</span><span class="st">'label'</span>, hue<span class="op">=</span>col2, data<span class="op">=</span>prop_df)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f'Employment Proportion by </span><span class="sc">{</span>col1<span class="sc">}</span><span class="ss"> and </span><span class="sc">{</span>col2<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(col1)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="ss">f'Employment Proportion (%)'</span>)</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> ax.patches:</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>        ax.annotate(<span class="ss">f'</span><span class="sc">{</span>p<span class="sc">.</span>get_height()<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">'</span>, </span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>                   (p.get_x() <span class="op">+</span> p.get_width() <span class="op">/</span> <span class="fl">2.</span>, p.get_height()),</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>                   ha <span class="op">=</span> <span class="st">'center'</span>, va <span class="op">=</span> <span class="st">'bottom'</span>,</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>                   xytext <span class="op">=</span> (<span class="dv">0</span>, <span class="dv">5</span>), textcoords <span class="op">=</span> <span class="st">'offset points'</span>)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>group_sex <span class="op">=</span> plot_intersection(df, <span class="st">'group'</span>, <span class="st">'SEX'</span>)</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>    </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -852,9 +849,9 @@ Name: label, dtype: float64</code></pre>
 </div>
 </div>
 <p>For many groups, the percentage of men who are employed is higher than that of women. One notable group where this is not the case is <code>2</code> Black/African American where the percentage of employed women is ~44% against ~39% for men.</p>
-<p>– 1: White alone– 2: Black or African American alone– 3: American Indian alone– 4: Alaska Native alone– 5: American Indian and Alaska Native tribes specified, or American Indian or Alaska Native, not specified and no other races– 6: Asian alone– 7: Native Hawaiian and Other Pacific Islander alone– 8: Some Other Race alone– 9: Two or More Races</p>
-<div id="cell-35" class="cell" data-execution_count="74">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>group_nativity <span class="op">=</span> plot_intersection(df, <span class="st">'group'</span>, <span class="st">'NATIVITY'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>NATIVITY</code> indicates a persons place of birth. <code>1</code> being Native born and <code>2</code> being Foreign born.</p>
+<div id="cell-35" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>group_nativity <span class="op">=</span> plot_intersection(df, <span class="st">'group'</span>, <span class="st">'NATIVITY'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -863,8 +860,9 @@ Name: label, dtype: float64</code></pre>
 </div>
 </div>
 </div>
-<div id="cell-36" class="cell" data-execution_count="75">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>group_dis <span class="op">=</span> plot_intersection(df, <span class="st">'group'</span>, <span class="st">'DIS'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Interestingly, across the board we see that the percentage of foreign born individuals who are employed is much higher than the proportion of native born individuals. However, as seen in the plot below, this may be attributed to the fact that few foreign born individuals on the extremities of the age, reducing the influence of youth and seniority as factors in employment proportion.</p>
+<div id="cell-37" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>sns.displot(data<span class="op">=</span>df, x<span class="op">=</span><span class="st">"AGEP"</span>, hue<span class="op">=</span><span class="st">"NATIVITY"</span>, kind<span class="op">=</span><span class="st">"kde"</span>, bw_adjust<span class="op">=</span><span class="fl">0.5</span>, fill<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.75</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -873,19 +871,105 @@ Name: label, dtype: float64</code></pre>
 </div>
 </div>
 </div>
+<p><code>DIS</code> represents an individuals disability status. <code>1</code> with disability, and <code>2</code> without a disability.</p>
+<div id="cell-39" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>group_dis <span class="op">=</span> plot_intersection(df, <span class="st">'group'</span>, <span class="st">'DIS'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-20-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Across the board we see that people without disability are employed at a much higher proportion than people with disabilities.</p>
+<p><em>Supplementary plots that I thought were interesting.</em></p>
+<div id="cell-42" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>cit_sex <span class="op">=</span> plot_intersection(df, <span class="st">'CIT'</span>, <span class="st">'SEX'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-21-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-43" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>mar_sex <span class="op">=</span> plot_intersection(df, <span class="st">'MAR'</span>, <span class="st">'SEX'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-22-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-44" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>schl_sex <span class="op">=</span> plot_intersection(df, <span class="st">'SCHL'</span>, <span class="st">'SEX'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-23-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="model-training" class="level1">
 <h1>Model Training</h1>
 <p>We are now ready to create a model and train it on our training data. We will first scale our data, then we will employ a Random Forest Classifier. This approach uses an array of decision trees on various sub-samples of the data and aggregates their results. Learn more <a href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html">here</a>.</p>
-<div id="cell-39" class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> make_pipeline</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> make_pipeline(StandardScaler(), RandomForestClassifier())</span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>model.fit(X_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="14">
+<div id="cell-47" class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> make_pipeline</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> cross_val_score</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>acc <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>best_depth <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> depth <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>, <span class="dv">20</span>):</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> make_pipeline(StandardScaler(), RandomForestClassifier(max_depth<span class="op">=</span>depth))</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    model.fit(X_train, y_train)</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>    cv_scores <span class="op">=</span> cross_val_score(model, X_train, y_train, cv <span class="op">=</span> <span class="dv">5</span>)</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cv_scores.mean() <span class="op">&gt;</span> acc:</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>        best_depth <span class="op">=</span> depth</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>        acc <span class="op">=</span> cv_scores.mean()</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Best maximum tree depth: </span><span class="sc">{</span>best_depth<span class="sc">}</span><span class="ss">, Accuracy: </span><span class="sc">{</span>acc<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Testing depth: 5
+New best depth: 5, Accuracy: 0.8236452906691462
+Testing depth: 6
+New best depth: 6, Accuracy: 0.8259505856660108
+Testing depth: 7
+New best depth: 7, Accuracy: 0.827313920631686
+Testing depth: 8
+New best depth: 8, Accuracy: 0.8282930477014657
+Testing depth: 9
+New best depth: 9, Accuracy: 0.8293465518613873
+Testing depth: 10
+New best depth: 10, Accuracy: 0.830486803946218
+Testing depth: 11
+New best depth: 11, Accuracy: 0.8317386055364009
+Testing depth: 12
+New best depth: 12, Accuracy: 0.8326929417789775
+Testing depth: 13
+New best depth: 13, Accuracy: 0.8333870096679925
+Testing depth: 14
+New best depth: 14, Accuracy: 0.8339943311682759
+Testing depth: 15
+Testing depth: 16
+Testing depth: 17
+Testing depth: 18
+Testing depth: 19
+Best number of trees: 14, Accuracy: 0.8339943311682759</code></pre>
+</div>
+</div>
+<p>Above, we tuned our model complexity using the <em>max_depth</em> parameter of the <code>RandomForestClassifier</code>. This controls how deep each tree in our forest can get which impacts how general our model is with regards to things like overfitting. We examined values ranging from 5 to 20 for the max depth and found the highest cross validated accuracy when <em>max_depth</em>=14.</p>
+<div id="cell-49" class="cell" data-execution_count="42">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>RF <span class="op">=</span> make_pipeline(StandardScaler(), RandomForestClassifier(max_depth<span class="op">=</span>best_depth))</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>RF.fit(X_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="42">
 <style>#sk-container-id-2 {
   /* Definition of color scheme common for light and dark mode */
   --sklearn-color-text: #000;
@@ -1302,15 +1386,184 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
   background-color: var(--sklearn-color-fitted-level-3);
 }
 </style><div id="sk-container-id-2" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>Pipeline(steps=[('standardscaler', StandardScaler()),
-                ('randomforestclassifier', RandomForestClassifier())])</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-4" type="checkbox"><label for="sk-estimator-id-4" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>Pipeline</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.6/modules/generated/sklearn.pipeline.Pipeline.html">?<span>Documentation for Pipeline</span></a><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted"><pre>Pipeline(steps=[('standardscaler', StandardScaler()),
-                ('randomforestclassifier', RandomForestClassifier())])</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-5" type="checkbox"><label for="sk-estimator-id-5" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>StandardScaler</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.6/modules/generated/sklearn.preprocessing.StandardScaler.html">?<span>Documentation for StandardScaler</span></a></div></label><div class="sk-toggleable__content fitted"><pre>StandardScaler()</pre></div> </div></div><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-6" type="checkbox"><label for="sk-estimator-id-6" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>RandomForestClassifier</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.6/modules/generated/sklearn.ensemble.RandomForestClassifier.html">?<span>Documentation for RandomForestClassifier</span></a></div></label><div class="sk-toggleable__content fitted"><pre>RandomForestClassifier()</pre></div> </div></div></div></div></div></div>
+                ('randomforestclassifier',
+                 RandomForestClassifier(max_depth=14))])</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-4" type="checkbox"><label for="sk-estimator-id-4" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>Pipeline</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.6/modules/generated/sklearn.pipeline.Pipeline.html">?<span>Documentation for Pipeline</span></a><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted"><pre>Pipeline(steps=[('standardscaler', StandardScaler()),
+                ('randomforestclassifier',
+                 RandomForestClassifier(max_depth=14))])</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-5" type="checkbox"><label for="sk-estimator-id-5" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>StandardScaler</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.6/modules/generated/sklearn.preprocessing.StandardScaler.html">?<span>Documentation for StandardScaler</span></a></div></label><div class="sk-toggleable__content fitted"><pre>StandardScaler()</pre></div> </div></div><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-6" type="checkbox"><label for="sk-estimator-id-6" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>RandomForestClassifier</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.6/modules/generated/sklearn.ensemble.RandomForestClassifier.html">?<span>Documentation for RandomForestClassifier</span></a></div></label><div class="sk-toggleable__content fitted"><pre>RandomForestClassifier(max_depth=14)</pre></div> </div></div></div></div></div></div>
 </div>
 </div>
-<div id="cell-40" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>y_hat <span class="op">=</span> model.predict(X_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="model-audit" class="level1">
+<h1>Model Audit</h1>
+<section id="overall-measures" class="level4">
+<h4 class="anchored" data-anchor-id="overall-measures">Overall Measures</h4>
+<div id="cell-52" class="cell" data-execution_count="84">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>y_hat <span class="op">=</span> RF.predict(X_test)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>(y_hat <span class="op">==</span> y_test).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="84">
+<pre><code>np.float64(0.8281195776114223)</code></pre>
+</div>
+</div>
+<p>Our model has an <strong>overall accuracy of 82.81%</strong> on the testing data suite. Not too shabby!</p>
+<p>We will now address the <em>positive predictive value</em> (<strong>PPV</strong>) of our model (we wont evaluate true <em>sufficiency</em> right now as we are skipping NPV). Given that the prediction is positive (y_hat = 1), how likely is it that the prediction is accurate (y_test = 1)? In other words, if we predict someone to be employed, how likely is it that they are actually employed?</p>
+<p>We can approximate this value with the following code:</p>
+<div id="cell-55" class="cell" data-execution_count="85">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>tp <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>fp <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>ppv <span class="op">=</span> tp.<span class="bu">sum</span>() <span class="op">/</span> (tp.<span class="bu">sum</span>() <span class="op">+</span> fp.<span class="bu">sum</span>())</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Positive Predictive Value: </span><span class="sc">{</span>ppv<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Positive Predictive Value: 77.25%</code></pre>
+</div>
+</div>
+<p>So, when our model predicts someone is employed, they are actually employed 77.25% of the time.</p>
+<div id="cell-57" class="cell" data-execution_count="86">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> ConfusionMatrixDisplay</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_hat)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>ConfusionMatrixDisplay(cm, display_labels<span class="op">=</span>[<span class="st">'Not Employed'</span>, <span class="st">'Employed'</span>]).plot(cmap<span class="op">=</span><span class="st">'Blues'</span>)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Confusion Matrix'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="86">
+<pre><code>Text(0.5, 1.0, 'Confusion Matrix')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-28-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Above is our confusion matrix, lets use this information to find the false negative and false positive rates for our model.</p>
+<div id="cell-59" class="cell" data-execution_count="87">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>fn <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>fnr <span class="op">=</span> fn.<span class="bu">sum</span>() <span class="op">/</span> (tp.<span class="bu">sum</span>() <span class="op">+</span> fn.<span class="bu">sum</span>())</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"False Negative Rate: </span><span class="sc">{</span>fnr<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>False Negative Rate: 12.30%</code></pre>
+</div>
+</div>
+<p>Our model incorrectly classified people as unemployed when they were in fact employed 12.3% of the time.</p>
+<div id="cell-61" class="cell" data-execution_count="88">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>fp <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>tn <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>fpr <span class="op">=</span> fp.<span class="bu">sum</span>() <span class="op">/</span> (fp.<span class="bu">sum</span>() <span class="op">+</span> tn.<span class="bu">sum</span>())</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"False Positive Rate: </span><span class="sc">{</span>fpr<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>False Positive Rate: 21.20%</code></pre>
+</div>
+</div>
+<p>Our model incorrectly classified people as employed when they were in fact unemployed 21.2% of the time.</p>
+</section>
+<section id="by-group-measures" class="level4">
+<h4 class="anchored" data-anchor-id="by-group-measures">By-Group Measures</h4>
+<p>Now, lets explore how our model treats people <strong>in their respective groups</strong>. We are going to focus primarily on the possible discrepancies between individuals in <code>1</code> White Alone and <code>2</code> Black/African American Alone groups.</p>
+<div id="cell-65" class="cell" data-execution_count="71">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>wa <span class="op">=</span> (y_hat <span class="op">==</span> y_test)[group_test <span class="op">==</span> <span class="dv">1</span>].mean()</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>aa <span class="op">=</span> (y_hat <span class="op">==</span> y_test)[group_test <span class="op">==</span> <span class="dv">2</span>].mean()</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"White Alone Accuracy: </span><span class="sc">{</span>wa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%</span><span class="ch">\n</span><span class="ss">Black/African American Alone Accuracy: </span><span class="sc">{</span>aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>White Alone Accuracy: 82.45%
+Black/African American Alone Accuracy: 83.13%</code></pre>
+</div>
+</div>
+<p>Our model has pretty comparable accuracy scores for both groups, only slightly lower for White Alone individuals.</p>
+<div id="cell-67" class="cell" data-execution_count="73">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>tp_wa <span class="op">=</span> ((y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">1</span>))</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>fp_wa <span class="op">=</span> ((y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">1</span>))</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>ppv_wa <span class="op">=</span> tp_wa.<span class="bu">sum</span>() <span class="op">/</span> (tp_wa.<span class="bu">sum</span>() <span class="op">+</span> fp_wa.<span class="bu">sum</span>())</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>tp_aa <span class="op">=</span> ((y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">2</span>))</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>fp_aa <span class="op">=</span> ((y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">2</span>))</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>ppv_aa <span class="op">=</span> tp_aa.<span class="bu">sum</span>() <span class="op">/</span> (tp_aa.<span class="bu">sum</span>() <span class="op">+</span> fp_aa.<span class="bu">sum</span>())</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"PPV for White Alone: </span><span class="sc">{</span>ppv_wa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"PPV for Black/African American Alone: </span><span class="sc">{</span>ppv_aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>PPV for White Alone: 77.81%
+PPV for Black/African American Alone: 75.65%</code></pre>
+</div>
+</div>
+<p>Once again our PPV rates are quite comparable, although the White Alone group does have a slightly higher PPV.</p>
+<div id="cell-69" class="cell" data-execution_count="75">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>fn_wa <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">1</span>)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>fnr_wa <span class="op">=</span> fn_wa.<span class="bu">sum</span>() <span class="op">/</span> (tp_wa.<span class="bu">sum</span>() <span class="op">+</span> fn_wa.<span class="bu">sum</span>())</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>fn_aa <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">2</span>)</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>fnr_aa <span class="op">=</span> fn_aa.<span class="bu">sum</span>() <span class="op">/</span> (tp_aa.<span class="bu">sum</span>() <span class="op">+</span> fn_aa.<span class="bu">sum</span>())</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"FNR for White Alone: </span><span class="sc">{</span>fnr<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"FNR for Black/African American Alone: </span><span class="sc">{</span>fnr_aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>FNR for White Alone: 12.30%
+FNR for Black/African American Alone: 12.57%</code></pre>
+</div>
+</div>
+<p>The false negative rates are once again very similar across groups.</p>
+<div id="cell-71" class="cell" data-execution_count="76">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>fp_wa <span class="op">=</span> ((y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">1</span>))</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>tn_wa <span class="op">=</span> ((y_hat <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">1</span>))</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>fpr_wa <span class="op">=</span> fp_wa.<span class="bu">sum</span>() <span class="op">/</span> (fp_wa.<span class="bu">sum</span>() <span class="op">+</span> tn_wa.<span class="bu">sum</span>())</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>fp_aa <span class="op">=</span> ((y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">2</span>))</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>tn_aa <span class="op">=</span> ((y_hat <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">2</span>))</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>fpr_aa <span class="op">=</span> fp_aa.<span class="bu">sum</span>() <span class="op">/</span> (fp_aa.<span class="bu">sum</span>() <span class="op">+</span> tn_aa.<span class="bu">sum</span>())</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"FPR for White Alone: </span><span class="sc">{</span>fpr_wa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"FPR for Black/African American Alone: </span><span class="sc">{</span>fpr_aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>FPR for White Alone: 21.63%
+FPR for Black/African American Alone: 19.91%</code></pre>
+</div>
+</div>
+<p>There is some slight discrepancy here as persons in the White Alone group is more often mistaken for having a job than persons in the Black/African American Alone group.</p>
+</section>
+<section id="bias-measures" class="level4">
+<h4 class="anchored" data-anchor-id="bias-measures">Bias Measures</h4>
+<p>In terms of accuracy, our model seems to be performing well. Let’s take a deeper look at how our model <em>might be <strong>biased or unfair</strong></em> by examining <em>calibration</em>, <em>error rate balance</em>, and <em>statistical parity</em>.</p>
+<p>Our model can be considered <em>well-calibrated</em> or <em>sufficient</em> if it reflects equal likelihood of employment irrespective of the individuals’ group membership. That is, free from predictive bias, this our PPV for both groups should be the same. Looking back to our calculation of these scores, we saw that they were about equal. PPV for White Alone: 77.81% and PPV for Black/African American Alone: 75.65%. Thus, we can say our model is well-calibrated.</p>
+<hr>
+<p>Our model can only satisfy approximate <em>error rate balance</em> given that the true positive rate (TPR) and false positive rates (FPR) be equal on the two groups.</p>
+<div id="cell-77" class="cell" data-execution_count="99">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>tpr_wa <span class="op">=</span> tp_wa.<span class="bu">sum</span>() <span class="op">/</span> (tp_wa.<span class="bu">sum</span>() <span class="op">+</span> fn_wa.<span class="bu">sum</span>())</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>tpr_aa <span class="op">=</span> tp_aa.<span class="bu">sum</span>() <span class="op">/</span> (tp_aa.<span class="bu">sum</span>() <span class="op">+</span> fn_aa.<span class="bu">sum</span>())</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"TPR --&gt; WA: </span><span class="sc">{</span>tpr_wa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">% ~~ AA: </span><span class="sc">{</span>tpr_aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"FPR --&gt; WA: </span><span class="sc">{</span>fpr_wa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">% ~~ AA: </span><span class="sc">{</span>fpr_aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>TPR --&gt; WA: 87.14% ~~ AA: 87.43%
+FPR --&gt; WA: 21.63% ~~ AA: 19.91%</code></pre>
+</div>
+</div>
+<p>We can see that both groups have an approximately equal TPR and FPRs. Thus our model satisfies approximate error rate balance.</p>
+<hr>
+<p>Our model satisfies <em>statistical parity</em> if the proportion of individuals classified as employed is the same for each group.</p>
+<div id="cell-80" class="cell" data-execution_count="98">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>prop_wa <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">1</span>)[group_test <span class="op">==</span> <span class="dv">1</span>].mean()</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>prop_aa <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">1</span>)[group_test <span class="op">==</span> <span class="dv">2</span>].mean()</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Proportion of White Alone Predicted to be Employed: </span><span class="sc">{</span>prop_wa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Proportion of Black/African American Alone Predicted to be Employed: </span><span class="sc">{</span>prop_aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Proportion of White Alone Predicted to be Employed: 52.11%
+Proportion of Black/African American Alone Predicted to be Employed: 47.89%</code></pre>
+</div>
+</div>
+<p>We can observe some differences in these two scores, a higher proportion of White Alone persons are predicted to be employed than Black/African American Alone persons. The difference remains small as the rated are within 5% of one another… nonetheless our model does <strong>not</strong> satisfy statistical parity.</p>
+<hr>
+</section>
+<section id="feasible-fnr-and-fprs" class="level4">
+<h4 class="anchored" data-anchor-id="feasible-fnr-and-fprs">Feasible FNR and FPRs</h4>
+<div id="cell-84" class="cell" data-execution_count="101">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>p_wa <span class="op">=</span> ((y_test <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_hat <span class="op">==</span> <span class="dv">1</span>))[group_test <span class="op">==</span> <span class="dv">1</span>].mean()</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>p_aa <span class="op">=</span> ((y_test <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_hat <span class="op">==</span> <span class="dv">1</span>))[group_test <span class="op">==</span> <span class="dv">2</span>].mean()</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Prevalence of White Alone: </span><span class="sc">{</span>p_wa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Prevalence of Black/African American Alone: </span><span class="sc">{</span>p_aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Prevalence of White Alone: 40.55%
+Prevalence of Black/African American Alone: 36.23%</code></pre>
+</div>
 </div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
