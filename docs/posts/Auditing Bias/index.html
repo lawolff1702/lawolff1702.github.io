@@ -243,7 +243,7 @@ window.Quarto = {
 
 <section id="abstract" class="level1">
 <h1>Abstract</h1>
-<p>– insert here –</p>
+<p>This project audits bias in automated decision-making systems by analyzing employment predictions from the 2018 American Community Survey (ACS) data for Georgia. A Random Forest Classifier was trained to predict employment status based on demographic features such as age, education, sex, disability, and nativity, while examining racial bias specifically between White and Black/African American individuals. The audit revealed approximately balanced accuracy, positive predictive values, and error rates across these racial groups, though slight discrepancies exist. Despite good numerical fairness, we must still consider ethical considerations regarding consent, data recency, and the ethical deployment of such models in different decision-making contexts.</p>
 </section>
 <section id="data-and-feature-selection" class="level1">
 <h1>Data and Feature Selection</h1>
@@ -759,9 +759,9 @@ True     36020
 Name: count, dtype: int64</code></pre>
 </div>
 </div>
-<div id="cell-24" class="cell" data-execution_count="78">
+<div id="cell-24" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'label'</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="78">
+<div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>np.float64(0.44643299786822666)</code></pre>
 </div>
 </div>
@@ -883,7 +883,9 @@ Name: label, dtype: float64</code></pre>
 </div>
 </div>
 <p>Across the board we see that people without disability are employed at a much higher proportion than people with disabilities.</p>
-<p><em>Supplementary plots that I thought were interesting.</em></p>
+<hr>
+<section id="supplementary-plots-that-i-thought-were-interesting." class="level5">
+<h5 class="anchored" data-anchor-id="supplementary-plots-that-i-thought-were-interesting."><strong><em>Supplementary plots that I thought were interesting.</em></strong></h5>
 <div id="cell-42" class="cell" data-execution_count="20">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>cit_sex <span class="op">=</span> plot_intersection(df, <span class="st">'CIT'</span>, <span class="st">'SEX'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -915,10 +917,11 @@ Name: label, dtype: float64</code></pre>
 </div>
 </div>
 </section>
+</section>
 <section id="model-training" class="level1">
 <h1>Model Training</h1>
 <p>We are now ready to create a model and train it on our training data. We will first scale our data, then we will employ a Random Forest Classifier. This approach uses an array of decision trees on various sub-samples of the data and aggregates their results. Learn more <a href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html">here</a>.</p>
-<div id="cell-47" class="cell">
+<div id="cell-47" class="cell" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> make_pipeline</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
@@ -937,40 +940,15 @@ Name: label, dtype: float64</code></pre>
 <span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Best maximum tree depth: </span><span class="sc">{</span>best_depth<span class="sc">}</span><span class="ss">, Accuracy: </span><span class="sc">{</span>acc<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Testing depth: 5
-New best depth: 5, Accuracy: 0.8236452906691462
-Testing depth: 6
-New best depth: 6, Accuracy: 0.8259505856660108
-Testing depth: 7
-New best depth: 7, Accuracy: 0.827313920631686
-Testing depth: 8
-New best depth: 8, Accuracy: 0.8282930477014657
-Testing depth: 9
-New best depth: 9, Accuracy: 0.8293465518613873
-Testing depth: 10
-New best depth: 10, Accuracy: 0.830486803946218
-Testing depth: 11
-New best depth: 11, Accuracy: 0.8317386055364009
-Testing depth: 12
-New best depth: 12, Accuracy: 0.8326929417789775
-Testing depth: 13
-New best depth: 13, Accuracy: 0.8333870096679925
-Testing depth: 14
-New best depth: 14, Accuracy: 0.8339943311682759
-Testing depth: 15
-Testing depth: 16
-Testing depth: 17
-Testing depth: 18
-Testing depth: 19
-Best number of trees: 14, Accuracy: 0.8339943311682759</code></pre>
+<pre><code>Best maximum tree depth: 16, Accuracy: 83.39%</code></pre>
 </div>
 </div>
-<p>Above, we tuned our model complexity using the <em>max_depth</em> parameter of the <code>RandomForestClassifier</code>. This controls how deep each tree in our forest can get which impacts how general our model is with regards to things like overfitting. We examined values ranging from 5 to 20 for the max depth and found the highest cross validated accuracy when <em>max_depth</em>=14.</p>
-<div id="cell-49" class="cell" data-execution_count="42">
+<p>Above, we tuned our model complexity using the <em>max_depth</em> parameter of the <code>RandomForestClassifier</code>. This controls how deep each tree in our forest can get which impacts how general our model is with regards to things like overfitting. We examined values ranging from 5 to 20 for the max depth and found the highest cross validated accuracy when <em>max_depth</em>=16.</p>
+<div id="cell-49" class="cell" data-execution_count="24">
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>RF <span class="op">=</span> make_pipeline(StandardScaler(), RandomForestClassifier(max_depth<span class="op">=</span>best_depth))</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>RF.fit(X_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="42">
-<style>#sk-container-id-2 {
+<div class="cell-output cell-output-display" data-execution_count="24">
+<style>#sk-container-id-1 {
   /* Definition of color scheme common for light and dark mode */
   --sklearn-color-text: #000;
   --sklearn-color-text-muted: #666;
@@ -1001,15 +979,15 @@ Best number of trees: 14, Accuracy: 0.8339943311682759</code></pre>
   }
 }
 
-#sk-container-id-2 {
+#sk-container-id-1 {
   color: var(--sklearn-color-text);
 }
 
-#sk-container-id-2 pre {
+#sk-container-id-1 pre {
   padding: 0;
 }
 
-#sk-container-id-2 input.sk-hidden--visually {
+#sk-container-id-1 input.sk-hidden--visually {
   border: 0;
   clip: rect(1px 1px 1px 1px);
   clip: rect(1px, 1px, 1px, 1px);
@@ -1021,7 +999,7 @@ Best number of trees: 14, Accuracy: 0.8339943311682759</code></pre>
   width: 1px;
 }
 
-#sk-container-id-2 div.sk-dashed-wrapped {
+#sk-container-id-1 div.sk-dashed-wrapped {
   border: 1px dashed var(--sklearn-color-line);
   margin: 0 0.4em 0.5em 0.4em;
   box-sizing: border-box;
@@ -1029,7 +1007,7 @@ Best number of trees: 14, Accuracy: 0.8339943311682759</code></pre>
   background-color: var(--sklearn-color-background);
 }
 
-#sk-container-id-2 div.sk-container {
+#sk-container-id-1 div.sk-container {
   /* jupyter's `normalize.less` sets `[hidden] { display: none; }`
      but bootstrap.min.css set `[hidden] { display: none !important; }`
      so we also need the `!important` here to be able to override the
@@ -1039,7 +1017,7 @@ Best number of trees: 14, Accuracy: 0.8339943311682759</code></pre>
   position: relative;
 }
 
-#sk-container-id-2 div.sk-text-repr-fallback {
+#sk-container-id-1 div.sk-text-repr-fallback {
   display: none;
 }
 
@@ -1055,14 +1033,14 @@ div.sk-item {
 
 /* Parallel-specific style estimator block */
 
-#sk-container-id-2 div.sk-parallel-item::after {
+#sk-container-id-1 div.sk-parallel-item::after {
   content: "";
   width: 100%;
   border-bottom: 2px solid var(--sklearn-color-text-on-default-background);
   flex-grow: 1;
 }
 
-#sk-container-id-2 div.sk-parallel {
+#sk-container-id-1 div.sk-parallel {
   display: flex;
   align-items: stretch;
   justify-content: center;
@@ -1070,28 +1048,28 @@ div.sk-item {
   position: relative;
 }
 
-#sk-container-id-2 div.sk-parallel-item {
+#sk-container-id-1 div.sk-parallel-item {
   display: flex;
   flex-direction: column;
 }
 
-#sk-container-id-2 div.sk-parallel-item:first-child::after {
+#sk-container-id-1 div.sk-parallel-item:first-child::after {
   align-self: flex-end;
   width: 50%;
 }
 
-#sk-container-id-2 div.sk-parallel-item:last-child::after {
+#sk-container-id-1 div.sk-parallel-item:last-child::after {
   align-self: flex-start;
   width: 50%;
 }
 
-#sk-container-id-2 div.sk-parallel-item:only-child::after {
+#sk-container-id-1 div.sk-parallel-item:only-child::after {
   width: 0;
 }
 
 /* Serial-specific style estimator block */
 
-#sk-container-id-2 div.sk-serial {
+#sk-container-id-1 div.sk-serial {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1109,14 +1087,14 @@ clickable and can be expanded/collapsed.
 
 /* Pipeline and ColumnTransformer style (default) */
 
-#sk-container-id-2 div.sk-toggleable {
+#sk-container-id-1 div.sk-toggleable {
   /* Default theme specific background. It is overwritten whether we have a
   specific estimator or a Pipeline/ColumnTransformer */
   background-color: var(--sklearn-color-background);
 }
 
 /* Toggleable label */
-#sk-container-id-2 label.sk-toggleable__label {
+#sk-container-id-1 label.sk-toggleable__label {
   cursor: pointer;
   display: flex;
   width: 100%;
@@ -1129,13 +1107,13 @@ clickable and can be expanded/collapsed.
   gap: 0.5em;
 }
 
-#sk-container-id-2 label.sk-toggleable__label .caption {
+#sk-container-id-1 label.sk-toggleable__label .caption {
   font-size: 0.6rem;
   font-weight: lighter;
   color: var(--sklearn-color-text-muted);
 }
 
-#sk-container-id-2 label.sk-toggleable__label-arrow:before {
+#sk-container-id-1 label.sk-toggleable__label-arrow:before {
   /* Arrow on the left of the label */
   content: "▸";
   float: left;
@@ -1143,13 +1121,13 @@ clickable and can be expanded/collapsed.
   color: var(--sklearn-color-icon);
 }
 
-#sk-container-id-2 label.sk-toggleable__label-arrow:hover:before {
+#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {
   color: var(--sklearn-color-text);
 }
 
 /* Toggleable content - dropdown */
 
-#sk-container-id-2 div.sk-toggleable__content {
+#sk-container-id-1 div.sk-toggleable__content {
   max-height: 0;
   max-width: 0;
   overflow: hidden;
@@ -1158,12 +1136,12 @@ clickable and can be expanded/collapsed.
   background-color: var(--sklearn-color-unfitted-level-0);
 }
 
-#sk-container-id-2 div.sk-toggleable__content.fitted {
+#sk-container-id-1 div.sk-toggleable__content.fitted {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-0);
 }
 
-#sk-container-id-2 div.sk-toggleable__content pre {
+#sk-container-id-1 div.sk-toggleable__content pre {
   margin: 0.2em;
   border-radius: 0.25em;
   color: var(--sklearn-color-text);
@@ -1171,79 +1149,79 @@ clickable and can be expanded/collapsed.
   background-color: var(--sklearn-color-unfitted-level-0);
 }
 
-#sk-container-id-2 div.sk-toggleable__content.fitted pre {
+#sk-container-id-1 div.sk-toggleable__content.fitted pre {
   /* unfitted */
   background-color: var(--sklearn-color-fitted-level-0);
 }
 
-#sk-container-id-2 input.sk-toggleable__control:checked~div.sk-toggleable__content {
+#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {
   /* Expand drop-down */
   max-height: 200px;
   max-width: 100%;
   overflow: auto;
 }
 
-#sk-container-id-2 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {
+#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {
   content: "▾";
 }
 
 /* Pipeline/ColumnTransformer-specific style */
 
-#sk-container-id-2 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {
+#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {
   color: var(--sklearn-color-text);
   background-color: var(--sklearn-color-unfitted-level-2);
 }
 
-#sk-container-id-2 div.sk-label.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
+#sk-container-id-1 div.sk-label.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
   background-color: var(--sklearn-color-fitted-level-2);
 }
 
 /* Estimator-specific style */
 
 /* Colorize estimator box */
-#sk-container-id-2 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {
+#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {
   /* unfitted */
   background-color: var(--sklearn-color-unfitted-level-2);
 }
 
-#sk-container-id-2 div.sk-estimator.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
+#sk-container-id-1 div.sk-estimator.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-2);
 }
 
-#sk-container-id-2 div.sk-label label.sk-toggleable__label,
-#sk-container-id-2 div.sk-label label {
+#sk-container-id-1 div.sk-label label.sk-toggleable__label,
+#sk-container-id-1 div.sk-label label {
   /* The background is the default theme color */
   color: var(--sklearn-color-text-on-default-background);
 }
 
 /* On hover, darken the color of the background */
-#sk-container-id-2 div.sk-label:hover label.sk-toggleable__label {
+#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {
   color: var(--sklearn-color-text);
   background-color: var(--sklearn-color-unfitted-level-2);
 }
 
 /* Label box, darken color on hover, fitted */
-#sk-container-id-2 div.sk-label.fitted:hover label.sk-toggleable__label.fitted {
+#sk-container-id-1 div.sk-label.fitted:hover label.sk-toggleable__label.fitted {
   color: var(--sklearn-color-text);
   background-color: var(--sklearn-color-fitted-level-2);
 }
 
 /* Estimator label */
 
-#sk-container-id-2 div.sk-label label {
+#sk-container-id-1 div.sk-label label {
   font-family: monospace;
   font-weight: bold;
   display: inline-block;
   line-height: 1.2em;
 }
 
-#sk-container-id-2 div.sk-label-container {
+#sk-container-id-1 div.sk-label-container {
   text-align: center;
 }
 
 /* Estimator-specific */
-#sk-container-id-2 div.sk-estimator {
+#sk-container-id-1 div.sk-estimator {
   font-family: monospace;
   border: 1px dotted var(--sklearn-color-border-box);
   border-radius: 0.25em;
@@ -1253,18 +1231,18 @@ clickable and can be expanded/collapsed.
   background-color: var(--sklearn-color-unfitted-level-0);
 }
 
-#sk-container-id-2 div.sk-estimator.fitted {
+#sk-container-id-1 div.sk-estimator.fitted {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-0);
 }
 
 /* on hover */
-#sk-container-id-2 div.sk-estimator:hover {
+#sk-container-id-1 div.sk-estimator:hover {
   /* unfitted */
   background-color: var(--sklearn-color-unfitted-level-2);
 }
 
-#sk-container-id-2 div.sk-estimator.fitted:hover {
+#sk-container-id-1 div.sk-estimator.fitted:hover {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-2);
 }
@@ -1352,7 +1330,7 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 
 /* "?"-specific style due to the `<a>` HTML tag */
 
-#sk-container-id-2 a.estimator_doc_link {
+#sk-container-id-1 a.estimator_doc_link {
   float: right;
   font-size: 1rem;
   line-height: 1em;
@@ -1367,29 +1345,29 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
   border: var(--sklearn-color-unfitted-level-1) 1pt solid;
 }
 
-#sk-container-id-2 a.estimator_doc_link.fitted {
+#sk-container-id-1 a.estimator_doc_link.fitted {
   /* fitted */
   border: var(--sklearn-color-fitted-level-1) 1pt solid;
   color: var(--sklearn-color-fitted-level-1);
 }
 
 /* On hover */
-#sk-container-id-2 a.estimator_doc_link:hover {
+#sk-container-id-1 a.estimator_doc_link:hover {
   /* unfitted */
   background-color: var(--sklearn-color-unfitted-level-3);
   color: var(--sklearn-color-background);
   text-decoration: none;
 }
 
-#sk-container-id-2 a.estimator_doc_link.fitted:hover {
+#sk-container-id-1 a.estimator_doc_link.fitted:hover {
   /* fitted */
   background-color: var(--sklearn-color-fitted-level-3);
 }
-</style><div id="sk-container-id-2" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>Pipeline(steps=[('standardscaler', StandardScaler()),
+</style><div id="sk-container-id-1" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>Pipeline(steps=[('standardscaler', StandardScaler()),
                 ('randomforestclassifier',
-                 RandomForestClassifier(max_depth=14))])</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-4" type="checkbox"><label for="sk-estimator-id-4" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>Pipeline</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.6/modules/generated/sklearn.pipeline.Pipeline.html">?<span>Documentation for Pipeline</span></a><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted"><pre>Pipeline(steps=[('standardscaler', StandardScaler()),
+                 RandomForestClassifier(max_depth=16))])</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox"><label for="sk-estimator-id-1" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>Pipeline</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.6/modules/generated/sklearn.pipeline.Pipeline.html">?<span>Documentation for Pipeline</span></a><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted"><pre>Pipeline(steps=[('standardscaler', StandardScaler()),
                 ('randomforestclassifier',
-                 RandomForestClassifier(max_depth=14))])</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-5" type="checkbox"><label for="sk-estimator-id-5" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>StandardScaler</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.6/modules/generated/sklearn.preprocessing.StandardScaler.html">?<span>Documentation for StandardScaler</span></a></div></label><div class="sk-toggleable__content fitted"><pre>StandardScaler()</pre></div> </div></div><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-6" type="checkbox"><label for="sk-estimator-id-6" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>RandomForestClassifier</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.6/modules/generated/sklearn.ensemble.RandomForestClassifier.html">?<span>Documentation for RandomForestClassifier</span></a></div></label><div class="sk-toggleable__content fitted"><pre>RandomForestClassifier(max_depth=14)</pre></div> </div></div></div></div></div></div>
+                 RandomForestClassifier(max_depth=16))])</pre></div> </div></div><div class="sk-serial"><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-2" type="checkbox"><label for="sk-estimator-id-2" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>StandardScaler</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.6/modules/generated/sklearn.preprocessing.StandardScaler.html">?<span>Documentation for StandardScaler</span></a></div></label><div class="sk-toggleable__content fitted"><pre>StandardScaler()</pre></div> </div></div><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-3" type="checkbox"><label for="sk-estimator-id-3" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>RandomForestClassifier</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.6/modules/generated/sklearn.ensemble.RandomForestClassifier.html">?<span>Documentation for RandomForestClassifier</span></a></div></label><div class="sk-toggleable__content fitted"><pre>RandomForestClassifier(max_depth=16)</pre></div> </div></div></div></div></div></div>
 </div>
 </div>
 </section>
@@ -1397,32 +1375,32 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 <h1>Model Audit</h1>
 <section id="overall-measures" class="level4">
 <h4 class="anchored" data-anchor-id="overall-measures">Overall Measures</h4>
-<div id="cell-52" class="cell" data-execution_count="84">
+<div id="cell-52" class="cell" data-execution_count="25">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>y_hat <span class="op">=</span> RF.predict(X_test)</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>(y_hat <span class="op">==</span> y_test).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="84">
+<div class="cell-output cell-output-display" data-execution_count="25">
 <pre><code>np.float64(0.8281195776114223)</code></pre>
 </div>
 </div>
 <p>Our model has an <strong>overall accuracy of 82.81%</strong> on the testing data suite. Not too shabby!</p>
 <p>We will now address the <em>positive predictive value</em> (<strong>PPV</strong>) of our model (we wont evaluate true <em>sufficiency</em> right now as we are skipping NPV). Given that the prediction is positive (y_hat = 1), how likely is it that the prediction is accurate (y_test = 1)? In other words, if we predict someone to be employed, how likely is it that they are actually employed?</p>
 <p>We can approximate this value with the following code:</p>
-<div id="cell-55" class="cell" data-execution_count="85">
+<div id="cell-55" class="cell" data-execution_count="26">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>tp <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>)</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>fp <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>)</span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>ppv <span class="op">=</span> tp.<span class="bu">sum</span>() <span class="op">/</span> (tp.<span class="bu">sum</span>() <span class="op">+</span> fp.<span class="bu">sum</span>())</span>
 <span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Positive Predictive Value: </span><span class="sc">{</span>ppv<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Positive Predictive Value: 77.25%</code></pre>
+<pre><code>Positive Predictive Value: 77.46%</code></pre>
 </div>
 </div>
-<p>So, when our model predicts someone is employed, they are actually employed 77.25% of the time.</p>
-<div id="cell-57" class="cell" data-execution_count="86">
+<p>So, when our model predicts someone is employed, they are actually employed 77.46% of the time.</p>
+<div id="cell-57" class="cell" data-execution_count="27">
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> ConfusionMatrixDisplay</span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, y_hat)</span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>ConfusionMatrixDisplay(cm, display_labels<span class="op">=</span>[<span class="st">'Not Employed'</span>, <span class="st">'Employed'</span>]).plot(cmap<span class="op">=</span><span class="st">'Blues'</span>)</span>
 <span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Confusion Matrix'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="86">
+<div class="cell-output cell-output-display" data-execution_count="27">
 <pre><code>Text(0.5, 1.0, 'Confusion Matrix')</code></pre>
 </div>
 <div class="cell-output cell-output-display">
@@ -1434,40 +1412,40 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 </div>
 </div>
 <p>Above is our confusion matrix, lets use this information to find the false negative and false positive rates for our model.</p>
-<div id="cell-59" class="cell" data-execution_count="87">
+<div id="cell-59" class="cell" data-execution_count="28">
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>fn <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>)</span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>fnr <span class="op">=</span> fn.<span class="bu">sum</span>() <span class="op">/</span> (tp.<span class="bu">sum</span>() <span class="op">+</span> fn.<span class="bu">sum</span>())</span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"False Negative Rate: </span><span class="sc">{</span>fnr<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>False Negative Rate: 12.30%</code></pre>
+<pre><code>False Negative Rate: 12.74%</code></pre>
 </div>
 </div>
-<p>Our model incorrectly classified people as unemployed when they were in fact employed 12.3% of the time.</p>
-<div id="cell-61" class="cell" data-execution_count="88">
+<p>Our model incorrectly classified people as unemployed when they were in fact employed 12.74% of the time.</p>
+<div id="cell-61" class="cell" data-execution_count="29">
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>fp <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>)</span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>tn <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>)</span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>fpr <span class="op">=</span> fp.<span class="bu">sum</span>() <span class="op">/</span> (fp.<span class="bu">sum</span>() <span class="op">+</span> tn.<span class="bu">sum</span>())</span>
 <span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"False Positive Rate: </span><span class="sc">{</span>fpr<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>False Positive Rate: 21.20%</code></pre>
+<pre><code>False Positive Rate: 20.84%</code></pre>
 </div>
 </div>
-<p>Our model incorrectly classified people as employed when they were in fact unemployed 21.2% of the time.</p>
+<p>Our model incorrectly classified people as employed when they were in fact unemployed 20.84% of the time.</p>
 </section>
 <section id="by-group-measures" class="level4">
 <h4 class="anchored" data-anchor-id="by-group-measures">By-Group Measures</h4>
 <p>Now, lets explore how our model treats people <strong>in their respective groups</strong>. We are going to focus primarily on the possible discrepancies between individuals in <code>1</code> White Alone and <code>2</code> Black/African American Alone groups.</p>
-<div id="cell-65" class="cell" data-execution_count="71">
+<div id="cell-65" class="cell" data-execution_count="30">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>wa <span class="op">=</span> (y_hat <span class="op">==</span> y_test)[group_test <span class="op">==</span> <span class="dv">1</span>].mean()</span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>aa <span class="op">=</span> (y_hat <span class="op">==</span> y_test)[group_test <span class="op">==</span> <span class="dv">2</span>].mean()</span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"White Alone Accuracy: </span><span class="sc">{</span>wa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%</span><span class="ch">\n</span><span class="ss">Black/African American Alone Accuracy: </span><span class="sc">{</span>aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>White Alone Accuracy: 82.45%
-Black/African American Alone Accuracy: 83.13%</code></pre>
+<pre><code>White Alone Accuracy: 82.40%
+Black/African American Alone Accuracy: 83.17%</code></pre>
 </div>
 </div>
 <p>Our model has pretty comparable accuracy scores for both groups, only slightly lower for White Alone individuals.</p>
-<div id="cell-67" class="cell" data-execution_count="73">
+<div id="cell-67" class="cell" data-execution_count="31">
 <div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>tp_wa <span class="op">=</span> ((y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">1</span>))</span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>fp_wa <span class="op">=</span> ((y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">1</span>))</span>
 <span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>ppv_wa <span class="op">=</span> tp_wa.<span class="bu">sum</span>() <span class="op">/</span> (tp_wa.<span class="bu">sum</span>() <span class="op">+</span> fp_wa.<span class="bu">sum</span>())</span>
@@ -1479,12 +1457,12 @@ Black/African American Alone Accuracy: 83.13%</code></pre>
 <span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"PPV for White Alone: </span><span class="sc">{</span>ppv_wa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
 <span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"PPV for Black/African American Alone: </span><span class="sc">{</span>ppv_aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>PPV for White Alone: 77.81%
-PPV for Black/African American Alone: 75.65%</code></pre>
+<pre><code>PPV for White Alone: 77.96%
+PPV for Black/African American Alone: 75.84%</code></pre>
 </div>
 </div>
 <p>Once again our PPV rates are quite comparable, although the White Alone group does have a slightly higher PPV.</p>
-<div id="cell-69" class="cell" data-execution_count="75">
+<div id="cell-69" class="cell" data-execution_count="32">
 <div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>fn_wa <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">1</span>)</span>
 <span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>fnr_wa <span class="op">=</span> fn_wa.<span class="bu">sum</span>() <span class="op">/</span> (tp_wa.<span class="bu">sum</span>() <span class="op">+</span> fn_wa.<span class="bu">sum</span>())</span>
 <span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1494,12 +1472,12 @@ PPV for Black/African American Alone: 75.65%</code></pre>
 <span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"FNR for White Alone: </span><span class="sc">{</span>fnr<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
 <span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"FNR for Black/African American Alone: </span><span class="sc">{</span>fnr_aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>FNR for White Alone: 12.30%
-FNR for Black/African American Alone: 12.57%</code></pre>
+<pre><code>FNR for White Alone: 12.74%
+FNR for Black/African American Alone: 12.86%</code></pre>
 </div>
 </div>
 <p>The false negative rates are once again very similar across groups.</p>
-<div id="cell-71" class="cell" data-execution_count="76">
+<div id="cell-71" class="cell" data-execution_count="33">
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>fp_wa <span class="op">=</span> ((y_hat <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">1</span>))</span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>tn_wa <span class="op">=</span> ((y_hat <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (y_test <span class="op">==</span> <span class="dv">0</span>) <span class="op">&amp;</span> (group_test <span class="op">==</span> <span class="dv">1</span>))</span>
 <span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>fpr_wa <span class="op">=</span> fp_wa.<span class="bu">sum</span>() <span class="op">/</span> (fp_wa.<span class="bu">sum</span>() <span class="op">+</span> tn_wa.<span class="bu">sum</span>())</span>
@@ -1511,8 +1489,8 @@ FNR for Black/African American Alone: 12.57%</code></pre>
 <span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"FPR for White Alone: </span><span class="sc">{</span>fpr_wa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
 <span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"FPR for Black/African American Alone: </span><span class="sc">{</span>fpr_aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>FPR for White Alone: 21.63%
-FPR for Black/African American Alone: 19.91%</code></pre>
+<pre><code>FPR for White Alone: 21.33%
+FPR for Black/African American Alone: 19.64%</code></pre>
 </div>
 </div>
 <p>There is some slight discrepancy here as persons in the White Alone group is more often mistaken for having a job than persons in the Black/African American Alone group.</p>
@@ -1520,50 +1498,100 @@ FPR for Black/African American Alone: 19.91%</code></pre>
 <section id="bias-measures" class="level4">
 <h4 class="anchored" data-anchor-id="bias-measures">Bias Measures</h4>
 <p>In terms of accuracy, our model seems to be performing well. Let’s take a deeper look at how our model <em>might be <strong>biased or unfair</strong></em> by examining <em>calibration</em>, <em>error rate balance</em>, and <em>statistical parity</em>.</p>
-<p>Our model can be considered <em>well-calibrated</em> or <em>sufficient</em> if it reflects equal likelihood of employment irrespective of the individuals’ group membership. That is, free from predictive bias, this our PPV for both groups should be the same. Looking back to our calculation of these scores, we saw that they were about equal. PPV for White Alone: 77.81% and PPV for Black/African American Alone: 75.65%. Thus, we can say our model is well-calibrated.</p>
+<p>Our model can be considered <em>well-calibrated</em> or <em>sufficient</em> if it reflects equal likelihood of employment irrespective of the individuals’ group membership. That is, free from predictive bias, this our PPV for both groups should be the same. Looking back to our calculation of these scores, we saw that they were about equal. PPV for White Alone: 77.96% and PPV for Black/African American Alone: 75.84%. Thus, we can say our model is well-calibrated.</p>
 <hr>
 <p>Our model can only satisfy approximate <em>error rate balance</em> given that the true positive rate (TPR) and false positive rates (FPR) be equal on the two groups.</p>
-<div id="cell-77" class="cell" data-execution_count="99">
+<div id="cell-77" class="cell" data-execution_count="34">
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>tpr_wa <span class="op">=</span> tp_wa.<span class="bu">sum</span>() <span class="op">/</span> (tp_wa.<span class="bu">sum</span>() <span class="op">+</span> fn_wa.<span class="bu">sum</span>())</span>
 <span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>tpr_aa <span class="op">=</span> tp_aa.<span class="bu">sum</span>() <span class="op">/</span> (tp_aa.<span class="bu">sum</span>() <span class="op">+</span> fn_aa.<span class="bu">sum</span>())</span>
 <span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"TPR --&gt; WA: </span><span class="sc">{</span>tpr_wa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">% ~~ AA: </span><span class="sc">{</span>tpr_aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
 <span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"FPR --&gt; WA: </span><span class="sc">{</span>fpr_wa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">% ~~ AA: </span><span class="sc">{</span>fpr_aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>TPR --&gt; WA: 87.14% ~~ AA: 87.43%
-FPR --&gt; WA: 21.63% ~~ AA: 19.91%</code></pre>
+<pre><code>TPR --&gt; WA: 86.69% ~~ AA: 87.14%
+FPR --&gt; WA: 21.33% ~~ AA: 19.64%</code></pre>
 </div>
 </div>
 <p>We can see that both groups have an approximately equal TPR and FPRs. Thus our model satisfies approximate error rate balance.</p>
 <hr>
 <p>Our model satisfies <em>statistical parity</em> if the proportion of individuals classified as employed is the same for each group.</p>
-<div id="cell-80" class="cell" data-execution_count="98">
+<div id="cell-80" class="cell" data-execution_count="35">
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>prop_wa <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">1</span>)[group_test <span class="op">==</span> <span class="dv">1</span>].mean()</span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>prop_aa <span class="op">=</span> (y_hat <span class="op">==</span> <span class="dv">1</span>)[group_test <span class="op">==</span> <span class="dv">2</span>].mean()</span>
 <span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Proportion of White Alone Predicted to be Employed: </span><span class="sc">{</span>prop_wa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
 <span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Proportion of Black/African American Alone Predicted to be Employed: </span><span class="sc">{</span>prop_aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Proportion of White Alone Predicted to be Employed: 52.11%
-Proportion of Black/African American Alone Predicted to be Employed: 47.89%</code></pre>
+<pre><code>Proportion of White Alone Predicted to be Employed: 51.74%
+Proportion of Black/African American Alone Predicted to be Employed: 47.61%</code></pre>
 </div>
 </div>
-<p>We can observe some differences in these two scores, a higher proportion of White Alone persons are predicted to be employed than Black/African American Alone persons. The difference remains small as the rated are within 5% of one another… nonetheless our model does <strong>not</strong> satisfy statistical parity.</p>
+<p>We can observe some differences in these two scores, a higher proportion of White Alone persons are predicted to be employed than Black/African American Alone persons. The difference remains small as the rated are within 5% of one another… as we don’t have a set threshold we cant know if the difference is significant, ergo we cant say that we do or do not satisfy statistical parity.</p>
 <hr>
 </section>
 <section id="feasible-fnr-and-fprs" class="level4">
 <h4 class="anchored" data-anchor-id="feasible-fnr-and-fprs">Feasible FNR and FPRs</h4>
-<div id="cell-84" class="cell" data-execution_count="101">
+<div id="cell-83" class="cell" data-execution_count="36">
 <div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>p_wa <span class="op">=</span> ((y_test <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_hat <span class="op">==</span> <span class="dv">1</span>))[group_test <span class="op">==</span> <span class="dv">1</span>].mean()</span>
 <span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>p_aa <span class="op">=</span> ((y_test <span class="op">==</span> <span class="dv">1</span>) <span class="op">&amp;</span> (y_hat <span class="op">==</span> <span class="dv">1</span>))[group_test <span class="op">==</span> <span class="dv">2</span>].mean()</span>
 <span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Prevalence of White Alone: </span><span class="sc">{</span>p_wa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
 <span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Prevalence of Black/African American Alone: </span><span class="sc">{</span>p_aa<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Prevalence of White Alone: 40.55%
-Prevalence of Black/African American Alone: 36.23%</code></pre>
+<pre><code>Prevalence of White Alone: 40.34%
+Prevalence of Black/African American Alone: 36.11%</code></pre>
 </div>
 </div>
-
-
+<p>The proportion of true positive values is higher with in the White Alone group.</p>
+<div id="cell-85" class="cell" data-execution_count="63">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>fnr_range <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">100</span>)</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>fpr_aa_alt <span class="op">=</span> (p_aa <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> p_aa)) <span class="op">*</span> ((<span class="dv">1</span> <span class="op">-</span> ppv_aa) <span class="op">/</span> ppv_aa) <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> fnr_aa)</span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>fpr_wa_alt <span class="op">=</span> (p_wa <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> p_wa)) <span class="op">*</span> ((<span class="dv">1</span> <span class="op">-</span> ppv_wa) <span class="op">/</span> ppv_wa) <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> fnr_wa)</span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Calibrate on low PPV --&gt; PPv from Black/African American Alone</span></span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>fpr_aa_feasible <span class="op">=</span> (p_aa <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> p_aa)) <span class="op">*</span> ((<span class="dv">1</span> <span class="op">-</span> ppv_aa) <span class="op">/</span> ppv_aa) <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> fnr_range) <span class="co"># PPVb is set equal to the observed value of PPVw</span></span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>fpr_wa_feasible <span class="op">=</span> (p_wa <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> p_wa)) <span class="op">*</span> ((<span class="dv">1</span> <span class="op">-</span> ppv_aa) <span class="op">/</span> ppv_aa) <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> fnr_range) <span class="co"># pw and PPVw are both held fixed</span></span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a>plt.plot(fnr_wa, fpr_wa_alt, <span class="st">'o'</span>, color<span class="op">=</span><span class="st">'orange'</span>, label<span class="op">=</span><span class="st">'White Alone'</span>)</span>
+<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a>plt.plot(fnr_aa, fpr_aa_alt, <span class="st">'o'</span>, color<span class="op">=</span><span class="st">'black'</span>, label<span class="op">=</span><span class="st">'Black/African American Alone'</span>)</span>
+<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>plt.plot(fnr_range, fpr_aa_feasible, <span class="st">'-'</span>, color<span class="op">=</span><span class="st">'black'</span>)</span>
+<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a>plt.plot(fnr_range, fpr_wa_feasible, <span class="st">'-'</span>, color<span class="op">=</span><span class="st">'orange'</span>)</span>
+<span id="cb57-19"><a href="#cb57-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-20"><a href="#cb57-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-21"><a href="#cb57-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Shading Attempts</span></span>
+<span id="cb57-22"><a href="#cb57-22" aria-hidden="true" tabindex="-1"></a><span class="co"># delta = np.abs(ppv_wa - ppv_aa)</span></span>
+<span id="cb57-23"><a href="#cb57-23" aria-hidden="true" tabindex="-1"></a><span class="co"># low = (p_wa / (1 - p_wa)) * ((1 - ppv_wa - (delta &lt; 0.05)) / ppv_wa - (delta &lt; 0.05)) * (1 - fnr_range)</span></span>
+<span id="cb57-24"><a href="#cb57-24" aria-hidden="true" tabindex="-1"></a><span class="co"># high = (p_wa / (1 - p_wa)) * ((1 - ppv_wa + (delta &lt; 0.05)) / ppv_wa + (delta &lt; 0.05)) * (1 - fnr_range)</span></span>
+<span id="cb57-25"><a href="#cb57-25" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.fill_between(fnr_range, low, high, color='blue', alpha=0.3)</span></span>
+<span id="cb57-26"><a href="#cb57-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-27"><a href="#cb57-27" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'False Negative Rate'</span>)</span>
+<span id="cb57-28"><a href="#cb57-28" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'False Positive Rate'</span>)</span>
+<span id="cb57-29"><a href="#cb57-29" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Feasible (FNR, FPR) combinations'</span>)</span>
+<span id="cb57-30"><a href="#cb57-30" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb57-31"><a href="#cb57-31" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-38-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Our current model appears to be working quite well for both groups as we can see their (FNR, FPR) points are not far separated. However, if we did want to equalize our false positive rates (classify someone as employed when they are not), this would necessitate an increase in the false negative rates for White Alone to around 0.22 from its current around 0.12. This would inevitably lead to a drop in accuracy. Contextually, this would mean classifying more White Alone persons who are actually employed as unemployed to match FPR.</p>
+<p>Nonetheless, our model performs close to even for both groups.</p>
 </section>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>There are many applications for a model of this sort. Making predictions on who is or isn’t employed would benefit many companies that operate on credit or lending. Knowing who is employed would help determine whether it would be wise to approve a higher credit limit, approve a mortgage application, or let someone lease a car. This is the case because employment can be widely used aa feature or indicator of someones ability to pay back their debts and the interest included therein. If you determine that better, your company can be more profitable. This could also be useful for marketing and advertising companies who can use these predictions to improve the targeting of their ads.</p>
+<p>Deploying this specific Random Forest Based model in a large scale setting could make the small discrepancies in error much larger. For instance, lets assume this model is being used by the US government to determine who needs unemployment aid. The small differences in FPRs (WA: ~21% &amp; AA: ~19) could mean tens of millions of people could be classified as employed and not receive the help they need. This would also be slightly disproportionate as millions more White Alone people would not get the aid they need when compared to the ratio of Black/African American individuals. Conversely, this FPR could be to their advantage in a commercial setting that would give them lower interest rates on loans, and possibly better odds at landing a job.</p>
+<p>Based on my Bias Audit, most of my standards of evaluation were quite close. None of them differed enough for me to view the model as problematic with regards to White Alone or Black/African American. Of course, the model also used data from other groups, thus necessitating further exploration into those groups to determine if there are problematic levels of bias.</p>
+<p>Bias aside, there could be other potential issues in deploying this algorithm. First and foremost, I believe that, with the exception of advertisement targeting, employment status should be requested and declared with the consent of the individual. There should be some government regulations in what industries are allowed to use such algorithms and how. In the situations that it is used, I worry about the transparency of the model processes. Transparency on what data the data is being used for as it is being collected, and where it came from when it is being used. Moreover, there should be transparency and easily interpretable in use cases like credit approvals, etc. Finally, using data from a Georgia may not be generalizable across the country or even in current day Georgia as many things have changed since 2018 and after COVID. There should be an effort made to keep the training data reflective of current day trends. Thus, even though the model appears acceptable with regards to numerical fairness metrics, there are broader ethical and practical concerns that we should address in order to deploy a responsible and effective model.</p>
+
+
 </section>
 
 </main> <!-- /main -->
