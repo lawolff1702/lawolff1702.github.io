@@ -56,8 +56,6 @@ class Perceptron(LinearModel):
             that the final column of X is a constant column of 1s. 
 
             y, torch.Tensor: the target vector.  y.size() = (n,). The possible labels for y are {0, 1}
-        
-        HINT: In order to use the math formulas in the lecture, you are going to need to construct a modified set of targets and predictions that have entries in {-1, 1} -- otherwise none of the formulas will work right! An easy to to make this conversion is: 
         """
         y_ = 2*y - 1
 
@@ -66,7 +64,7 @@ class Perceptron(LinearModel):
 
     def grad(self, X, y):
         y_ = 2*y - 1
-        return (-(1.0*((self.score(X) * y_) < 0))*y_*X).mean(dim=1)
+        return (-((1.0*((self.score(X) * y_) < 0))*y_).unsqueeze(1) * X).mean(dim=0) # hyperparameter of 1
 
 
 class PerceptronOptimizer:
@@ -74,10 +72,13 @@ class PerceptronOptimizer:
     def __init__(self, model):
         self.model = model 
     
-    def step(self, X, y):
+    def step(self, X, y, k=1, learn=1.0):
         """
         Compute one step of the perceptron update using the feature matrix X 
         and target vector y. 
         """
+        ix = torch.randperm(X.size(0))[:k]
+        batch_X, batch_y = X[ix, :], y[ix]
+
         self.model.loss(X, y)
-        self.model.w -= self.model.grad(X, y) 
+        self.model.w -= learn * self.model.grad(batch_X, batch_y) 
