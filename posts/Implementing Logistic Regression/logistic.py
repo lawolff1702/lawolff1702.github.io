@@ -61,10 +61,11 @@ class LogisticRegression(LinearModel):
 
             y, torch.Tensor: the target vector.  y.size() = (n,). The possible labels for y are between (0, 1)
         RETURNS: 
-            L, torch.Tensor: mean loss for the data points 
+            L, torch.Tensor: mean loss for the data points
         """
         s = self.score(X)
-        return (-y * torch.log(torch.sigmoid(s)) - (1 - y) * torch.log(1 - torch.sigmoid(s))).mean()
+        sig = torch.sigmoid(s)
+        return (-y * torch.log(sig) - (1 - y) * torch.log(1 - sig)).mean()
     
     def grad(self, X, y):
         """
@@ -83,7 +84,7 @@ class LogisticRegression(LinearModel):
             g, torch.Tensor: the gradient of the loss for the data point. g.size() = (n, p)   
         """
         s = self.score(X)
-        return (torch.matmul(X.T, (torch.sigmoid(s) - y)[:, None])).mean(dim=0)
+        return ((torch.sigmoid(s) - y)[:,None] * X).mean(dim=0)
 
 
 class GradientDescentOptimizer:
