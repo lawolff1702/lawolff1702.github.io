@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Lukka Wolff">
-<meta name="dcterms.date" content="2025-03-05">
+<meta name="dcterms.date" content="2025-04-09">
 <meta name="description" content="Implementing Logistic Regression in Python">
 
 <title>Implementing Logistic Regression – My Awesome CSCI 0451 Blog</title>
@@ -60,7 +60,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -121,7 +121,39 @@ background-image: url(../../img/landscape.png);
 background-size: cover;
       }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
 
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -190,7 +222,7 @@ background-size: cover;
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">March 5, 2025</p>
+        <p class="date">April 9, 2025</p>
       </div>
     </div>
     
@@ -209,7 +241,7 @@ background-size: cover;
 
 
 
-<div id="cell-1" class="cell">
+<div id="cell-1" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>load_ext autoreload</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>autoreload <span class="dv">2</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> logistic <span class="im">import</span> LogisticRegression, GradientDescentOptimizer</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -218,6 +250,497 @@ background-size: cover;
 <section id="abstract" class="level1">
 <h1>Abstract</h1>
 <p>— insert here —</p>
+</section>
+<section id="implementation" class="level1">
+<h1>Implementation</h1>
+<p>The logistic regression model I implemented minimizes the binary cross-entropy loss to classify data. During training, we use momentum to help the model move more quickly in the right direction by combining the current gradient with a fraction of the previous update as we try search the loss-space for a minimum. The momentum should help reduce oscillations and speed up convergence! Lets see how it works!</p>
+</section>
+<section id="exploration" class="level1">
+<h1>Exploration</h1>
+<p>We will start with <strong>vanilla gradient descent</strong>. We will be working with two-dimensional data (x1, x2) and setting our <span class="math inline">\(\beta\)</span> value to zero to nullify the momentum term.</p>
+<p>The code below provides functions to generate and plot data for a classification problem that we can address using our model. To test our vanilla model, lets generate some linearly separable data!</p>
+<div id="cell-8" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8-whitegrid'</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># torch.manual_seed(67)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> classification_data(n_points <span class="op">=</span> <span class="dv">300</span>, noise <span class="op">=</span> <span class="fl">0.2</span>, p_dims <span class="op">=</span> <span class="dv">2</span>):</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> torch.arange(n_points) <span class="op">&gt;=</span> <span class="bu">int</span>(n_points<span class="op">/</span><span class="dv">2</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="fl">1.0</span><span class="op">*</span>y</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> y[:, <span class="va">None</span>] <span class="op">+</span> torch.normal(<span class="fl">0.0</span>, noise, size <span class="op">=</span> (n_points,p_dims))</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> torch.cat((X, torch.ones((X.shape[<span class="dv">0</span>], <span class="dv">1</span>))), <span class="dv">1</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X, y</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_lr_data(X, y, ax):</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> X.shape[<span class="dv">1</span>] <span class="op">==</span> <span class="dv">3</span>, <span class="st">"This function only works for data created with p_dims == 2"</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    targets <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">1</span>]</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    markers <span class="op">=</span> [<span class="st">"o"</span> , <span class="st">","</span>]</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        ix <span class="op">=</span> y <span class="op">==</span> targets[i]</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        ax.scatter(X[ix,<span class="dv">0</span>], X[ix,<span class="dv">1</span>], s <span class="op">=</span> <span class="dv">20</span>,  c <span class="op">=</span> <span class="dv">2</span><span class="op">*</span>y[ix]<span class="op">-</span><span class="dv">1</span>, facecolors <span class="op">=</span> <span class="st">"none"</span>, edgecolors <span class="op">=</span> <span class="st">"darkgrey"</span>, cmap <span class="op">=</span> <span class="st">"PRGn"</span>, vmin <span class="op">=</span> <span class="op">-</span><span class="dv">2</span>, vmax <span class="op">=</span> <span class="dv">2</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>, marker <span class="op">=</span> markers[i])</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="vs">r"$x_1$"</span>, ylabel <span class="op">=</span> <span class="vs">r"$x_2$"</span>)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> classification_data(noise <span class="op">=</span> <span class="fl">0.2</span>, p_dims <span class="op">=</span> <span class="dv">2</span>)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>plot_lr_data(X, y, ax)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-3-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-9" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression() </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer(LR)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>loss_vec_vanilla <span class="op">=</span> []</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>max_iter <span class="op">=</span> <span class="dv">1000</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(max_iter): </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> LR.loss(X, y)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    loss_vec_vanilla.append(loss)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    opt.step(X, y, alpha<span class="op">=</span><span class="fl">0.45</span>, beta<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>loss</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>tensor(0.0148)</code></pre>
+</div>
+</div>
+<p><strong>ASK IN OFFICE HOURS WHY IT ISNT 0</strong></p>
+<p>Thats great! Looks like we were able to separate the data by achieving a minimal loss! Lets take a look at the line that separates our points.</p>
+<div id="cell-11" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> draw_line(w, x_min, x_max, ax, <span class="op">**</span>kwargs):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    w_ <span class="op">=</span> w.flatten()</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> torch.linspace(x_min, x_max, <span class="dv">101</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="op">-</span>(w_[<span class="dv">0</span>]<span class="op">*</span>x <span class="op">+</span> w_[<span class="dv">2</span>])<span class="op">/</span>w_[<span class="dv">1</span>]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    l <span class="op">=</span> ax.plot(x, y, <span class="op">**</span>kwargs)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>plot_lr_data(X, y, ax)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>draw_line(LR.w, x_min <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span>, x_max <span class="op">=</span> <span class="fl">1.5</span>, ax <span class="op">=</span> ax, color <span class="op">=</span> <span class="st">"slategrey"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-5-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>As seen above, our line very handily separates the two classes of points. Lets take a look at how our loss evolved over time by plotting our loss at each step.</p>
+<div id="cell-13" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>plt.plot(loss_vec_vanilla, color <span class="op">=</span> <span class="st">"purple"</span>, lw<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.scatter(torch.arange(len(loss_vec)), loss_vec, color = "purple")</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Logistic Regression Iteration"</span>, ylabel <span class="op">=</span> <span class="st">"loss"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>It is interesting to note that our Logistic Regression is not jumping around as we observed with the Perceptron algorithm in the <a href="https://lawolff1702.github.io/posts/Implementing%20the%20Perceptron%20Algorithm/">previous blog post</a>. On the contrary, using gradient descent on a convex loss function, we are slowly advancing towards the minimum of the function.</p>
+<p>Now lets look at how <strong>momentum</strong> can help us! We will use the same dataset, however, this time we will instantiate a model with a <span class="math inline">\(\beta=0.9\)</span>.</p>
+<div id="cell-16" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression() </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer(LR)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>loss_vec_momentum <span class="op">=</span> []</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(max_iter): </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> LR.loss(X, y)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    loss_vec_momentum.append(loss)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    opt.step(X, y, alpha<span class="op">=</span><span class="fl">0.45</span>, beta<span class="op">=</span><span class="fl">0.9</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>loss</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>tensor(0.0023)</code></pre>
+</div>
+</div>
+<p>Lets see how these processes stack up against each other. For the graph we are</p>
+<div id="cell-18" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>num_iter <span class="op">=</span> <span class="dv">500</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>plt.plot(loss_vec_vanilla[:num_iter], color <span class="op">=</span> <span class="st">"purple"</span>, lw<span class="op">=</span><span class="dv">2</span>, label <span class="op">=</span> <span class="st">"vanilla"</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>plt.plot(loss_vec_momentum[:num_iter], color <span class="op">=</span> <span class="st">"blue"</span>, lw<span class="op">=</span><span class="dv">2</span>, label <span class="op">=</span> <span class="st">"momentum"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Logistic Regression Iteration"</span>, ylabel <span class="op">=</span> <span class="st">"loss"</span>, title <span class="op">=</span> <span class="ss">f"Momentum vs. Vanilla Gradient Descent (first </span><span class="sc">{</span>num_iter<span class="sc">}</span><span class="ss"> iterations)"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>plt.legend()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-8-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>As we can see, including a momentum factor helps the model narrow in on the minimum loss a lot faster! When we use vanilla, we are updating our weight vector only using teh current gradient. However, with momentum we are also considering the direction of the previous update, so we build up momentum when we are going the right direction which helps us find the minimum faster.</p>
+<p>Next, we are going to take a look at some issues pertaining to <strong>overfitting</strong> our model. We are going to generate data where the the number of features is higher than the number of points we have, <code>p_dim &gt; n_points</code>. To illustrate the issues of overfitting, we will generate separate testing and validation data sets, then compare their accuracy.</p>
+<div id="cell-21" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>X_train, y_train <span class="op">=</span> classification_data(noise <span class="op">=</span> <span class="fl">1.2</span>, p_dims <span class="op">=</span> <span class="dv">100</span>, n_points <span class="op">=</span> <span class="dv">50</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>X_test, y_test <span class="op">=</span> classification_data(noise <span class="op">=</span> <span class="fl">1.2</span>, p_dims <span class="op">=</span> <span class="dv">100</span>, n_points <span class="op">=</span> <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here is a small helper function to calculate our accuracy.</p>
+<div id="cell-23" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> acc(model, X, y):</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    y_hat <span class="op">=</span> model.predict(X)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (y_hat <span class="op">==</span> y).<span class="bu">float</span>().mean().item()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now lets train a model that achieves 100% training accuracy!</p>
+<div id="cell-25" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression()</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer(LR)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>train_loss <span class="op">=</span> []</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>test_loss <span class="op">=</span> []</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">50</span>):</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    train_loss.append(LR.loss(X_train, y_train))</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    test_loss.append(LR.loss(X_test, y_test))</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    opt.step(X_train, y_train, alpha<span class="op">=</span><span class="fl">0.5</span>, beta<span class="op">=</span><span class="fl">0.9</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>train_acc <span class="op">=</span> acc(LR, X_train, y_train)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Training Accuracy: </span><span class="sc">{</span>train_acc <span class="op">*</span> <span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">% Training Loss: </span><span class="sc">{</span>LR<span class="sc">.</span>loss(X_train, y_train)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Training Accuracy: 100.00% Training Loss: 0.0000</code></pre>
+</div>
+</div>
+<p>Voila! This seems amazing! We have 100% accuracy and a very low loss! However, our testing data may not ignite the same happiness within us.</p>
+<div id="cell-27" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>test_acc <span class="op">=</span> acc(LR, X_test, y_test)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test Accuracy: </span><span class="sc">{</span>test_acc <span class="op">*</span> <span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">% Test Loss: </span><span class="sc">{</span>LR<span class="sc">.</span>loss(X_test, y_test)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Test Accuracy: 78.00% Test Loss: 1.5264</code></pre>
+</div>
+</div>
+<p>Youch. This is a lot lower accuracy that we would have liked. In addition, the testing loss is quite high! Lets have a look at how our model performs at each iteration.</p>
+<div id="cell-29" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>plt.plot(train_loss, color <span class="op">=</span> <span class="st">"green"</span>, lw<span class="op">=</span><span class="dv">2</span>, label <span class="op">=</span> <span class="st">"Training"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>plt.plot(test_loss, color <span class="op">=</span> <span class="st">"orange"</span>, lw<span class="op">=</span><span class="dv">2</span>, label <span class="op">=</span> <span class="st">"Testing"</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Logistic Regression Iteration"</span>, ylabel <span class="op">=</span> <span class="st">"loss"</span>, title <span class="op">=</span> <span class="ss">f"Training vs Testing Loss"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>plt.legend()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-13-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can see our training loss decrease and converge to zero, however, at a certain point our testing loss that was once decreasing too, begins to increase! The model continues to learn (and thus overfit) the training data, even as it starts to perform worse on generalizing to new data. When we have a higher number of features than we do samples, overfitting can become problematic as it did above.</p>
+</section>
+<section id="predicting-world-cup-match-winners" class="level1">
+<h1>Predicting World Cup Match Winners</h1>
+<p>To illustrate our Logistic Regression model on some empirical data, we are going to use <a href="https://www.kaggle.com/datasets/brenda89/fifa-world-cup-2022?resource=download">World Cup Match Data</a> and try and predict match winners! The dataset we are using was compiled on Kaggle by Brenda Loznik in 2022 from publicly available FIFA World Cup data. Players were manually classified as either goalkeeper, defender, midfielder, or offensive player. For each team, only the top-performing players were selected. These plater statistics were used to create the power scores for each team. In some cases, data is missing — this indicates that a country did not have enough qualifying players to met the selection criteria. Additionally, the dataset assumes that each season runs from September to the following August.</p>
+<div id="cell-32" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">'international_matches.csv'</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">home_team</th>
+<th data-quarto-table-cell-role="th">away_team</th>
+<th data-quarto-table-cell-role="th">home_team_continent</th>
+<th data-quarto-table-cell-role="th">away_team_continent</th>
+<th data-quarto-table-cell-role="th">home_team_fifa_rank</th>
+<th data-quarto-table-cell-role="th">away_team_fifa_rank</th>
+<th data-quarto-table-cell-role="th">home_team_total_fifa_points</th>
+<th data-quarto-table-cell-role="th">away_team_total_fifa_points</th>
+<th data-quarto-table-cell-role="th">home_team_score</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">shoot_out</th>
+<th data-quarto-table-cell-role="th">home_team_result</th>
+<th data-quarto-table-cell-role="th">home_team_goalkeeper_score</th>
+<th data-quarto-table-cell-role="th">away_team_goalkeeper_score</th>
+<th data-quarto-table-cell-role="th">home_team_mean_defense_score</th>
+<th data-quarto-table-cell-role="th">home_team_mean_offense_score</th>
+<th data-quarto-table-cell-role="th">home_team_mean_midfield_score</th>
+<th data-quarto-table-cell-role="th">away_team_mean_defense_score</th>
+<th data-quarto-table-cell-role="th">away_team_mean_offense_score</th>
+<th data-quarto-table-cell-role="th">away_team_mean_midfield_score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1993-08-08</td>
+<td>Bolivia</td>
+<td>Uruguay</td>
+<td>South America</td>
+<td>South America</td>
+<td>59</td>
+<td>22</td>
+<td>0</td>
+<td>0</td>
+<td>3</td>
+<td>...</td>
+<td>No</td>
+<td>Win</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1993-08-08</td>
+<td>Brazil</td>
+<td>Mexico</td>
+<td>South America</td>
+<td>North America</td>
+<td>8</td>
+<td>14</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>...</td>
+<td>No</td>
+<td>Draw</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1993-08-08</td>
+<td>Ecuador</td>
+<td>Venezuela</td>
+<td>South America</td>
+<td>South America</td>
+<td>35</td>
+<td>94</td>
+<td>0</td>
+<td>0</td>
+<td>5</td>
+<td>...</td>
+<td>No</td>
+<td>Win</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1993-08-08</td>
+<td>Guinea</td>
+<td>Sierra Leone</td>
+<td>Africa</td>
+<td>Africa</td>
+<td>65</td>
+<td>86</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>...</td>
+<td>No</td>
+<td>Win</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1993-08-08</td>
+<td>Paraguay</td>
+<td>Argentina</td>
+<td>South America</td>
+<td>South America</td>
+<td>67</td>
+<td>5</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>...</td>
+<td>No</td>
+<td>Lose</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 25 columns</p>
+</div>
+</div>
+</div>
+<p>Below are the training features we will be using, I selected mainly score based features like rank, points, and positional scores because I thought they would work best.</p>
+<div id="cell-34" class="cell" data-execution_count="40">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'home_team_fifa_rank'</span>,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'away_team_fifa_rank'</span>,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'home_team_total_fifa_points'</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'away_team_total_fifa_points'</span>,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'home_team_goalkeeper_score'</span>,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'home_team_mean_defense_score'</span>,</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'home_team_mean_offense_score'</span>,</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'home_team_mean_midfield_score'</span>,</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'away_team_goalkeeper_score'</span>,</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'away_team_mean_defense_score'</span>,</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'away_team_mean_offense_score'</span>,</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">'away_team_mean_midfield_score'</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here is a first look at our raw data. Lets do some quick preprocessing to clean the dataset to make sure we have data in all fields, create a target vector, etc.</p>
+<div id="cell-36" class="cell" data-execution_count="44">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> LabelEncoder</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>le <span class="op">=</span> LabelEncoder()</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>df_wc <span class="op">=</span> df[df[<span class="st">'tournament'</span>].<span class="bu">str</span>.contains(<span class="st">"World Cup"</span>, case<span class="op">=</span><span class="va">False</span>)]</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>df_wc_clean <span class="op">=</span> df_wc.dropna()</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>df_wc_clean <span class="op">=</span> df_wc_clean[df_wc_clean[<span class="st">'home_team_result'</span>] <span class="op">!=</span> <span class="st">'Draw'</span>]</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>df_wc_clean <span class="op">=</span> df_wc_clean[df_wc_clean[<span class="st">'shoot_out'</span>] <span class="op">==</span> <span class="st">'No'</span>]</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>le.fit(df_wc_clean[<span class="st">"home_team_result"</span>])</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>df_wc_clean[<span class="st">"home_team_result"</span>] <span class="op">=</span> le.transform(df_wc_clean[<span class="st">"home_team_result"</span>])</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>X_features <span class="op">=</span> torch.tensor(df_wc_clean[features].values, dtype<span class="op">=</span>torch.float32)</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>y_tensor <span class="op">=</span> torch.tensor(df_wc_clean[<span class="st">"home_team_result"</span>].values, dtype<span class="op">=</span>torch.float32)</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Add bias term</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>X_tensor <span class="op">=</span> torch.cat((X_features, torch.ones((X_features.shape[<span class="dv">0</span>], <span class="dv">1</span>))), <span class="dv">1</span>)</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Now split into train/val/test sets</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>X_train_tensor, X_temp_tensor, y_train_tensor, y_temp_tensor <span class="op">=</span> train_test_split(X_tensor, y_tensor, test_size<span class="op">=</span><span class="fl">0.4</span>, random_state<span class="op">=</span><span class="dv">72</span>, stratify<span class="op">=</span>y_tensor)</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>X_val_tensor, X_test_tensor, y_val_tensor, y_test_tensor <span class="op">=</span> train_test_split(X_temp_tensor, y_temp_tensor, test_size<span class="op">=</span><span class="fl">0.5</span>, random_state<span class="op">=</span><span class="dv">72</span>, stratify<span class="op">=</span>y_temp_tensor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>I selected only World Cup Matches, dropped the matches with missing data, dropped all the matches that ended in a draw or went to penalties, and made a binary encoding for who won the match. Finally I created training, validation, and testing split. Our target value is <code>home_team_result</code>.</p>
+<p>Lets go ahead and train our model! Lets first do <strong>without momentum</strong> then with momentum!</p>
+<div id="cell-39" class="cell" data-execution_count="96">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression()</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer(LR)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>max_iter <span class="op">=</span> <span class="dv">1000</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>train_loss <span class="op">=</span> []</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>val_loss <span class="op">=</span> []</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(max_iter):</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    train_loss.append(LR.loss(X_train_tensor, y_train_tensor))</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    val_loss.append(LR.loss(X_val_tensor, y_val_tensor))</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    opt.step(X_train_tensor, y_train_tensor, alpha<span class="op">=</span><span class="fl">0.1</span>, beta<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>train_acc <span class="op">=</span> acc(LR, X_train_tensor, y_train_tensor)</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>val_acc <span class="op">=</span> acc(LR, X_val_tensor, y_val_tensor)</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Training Accuracy: </span><span class="sc">{</span>train_acc <span class="op">*</span> <span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">% Training Loss: </span><span class="sc">{</span>LR<span class="sc">.</span>loss(X_train_tensor, y_train_tensor)<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Validation Accuracy: </span><span class="sc">{</span>val_acc <span class="op">*</span> <span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">% Validation Loss: </span><span class="sc">{</span>LR<span class="sc">.</span>loss(X_val_tensor, y_val_tensor)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Training Accuracy: 70.64% Training Loss: 4.6897
+Validation Accuracy: 76.37% Validation Loss: 3.7726</code></pre>
+</div>
+</div>
+<p>This is pretty good considering the nature of football! However, our loss remains quite high… Let’s see how we perform on our testing data:</p>
+<div id="cell-41" class="cell" data-execution_count="97">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>test_acc <span class="op">=</span> acc(LR, X_test_tensor, y_test_tensor)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test Accuracy: </span><span class="sc">{</span>test_acc <span class="op">*</span> <span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">% Test Loss: </span><span class="sc">{</span>LR<span class="sc">.</span>loss(X_test_tensor, y_test_tensor)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Test Accuracy: 70.33% Test Loss: 4.7601</code></pre>
+</div>
+</div>
+<p>We are still performing well on unseen data! That is a great sign for a model. Let’s explore how using momentum will affect the model</p>
+<div id="cell-43" class="cell" data-execution_count="100">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression()</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer(LR)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>max_iter <span class="op">=</span> <span class="dv">1000</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>train_loss_m <span class="op">=</span> []</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>val_loss_m <span class="op">=</span> []</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(max_iter):</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    train_loss_m.append(LR.loss(X_train_tensor, y_train_tensor))</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    val_loss_m.append(LR.loss(X_val_tensor, y_val_tensor))</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    opt.step(X_train_tensor, y_train_tensor, alpha<span class="op">=</span><span class="fl">0.1</span>, beta<span class="op">=</span><span class="fl">0.9</span>)</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>train_acc <span class="op">=</span> acc(LR, X_train_tensor, y_train_tensor)</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>val_acc <span class="op">=</span> acc(LR, X_val_tensor, y_val_tensor)</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>test_acc <span class="op">=</span> acc(LR, X_test_tensor, y_test_tensor)</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Training Accuracy: </span><span class="sc">{</span>train_acc <span class="op">*</span> <span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">% Training Loss: </span><span class="sc">{</span>LR<span class="sc">.</span>loss(X_train_tensor, y_train_tensor)<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Validation Accuracy: </span><span class="sc">{</span>val_acc <span class="op">*</span> <span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">% Validation Loss: </span><span class="sc">{</span>LR<span class="sc">.</span>loss(X_val_tensor, y_val_tensor)<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Test Accuracy: </span><span class="sc">{</span>test_acc <span class="op">*</span> <span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">% Test Loss: </span><span class="sc">{</span>LR<span class="sc">.</span>loss(X_test_tensor, y_test_tensor)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Training Accuracy: 71.56% Training Loss: 4.5244
+Validation Accuracy: 70.88% Validation Loss: 4.6493
+Test Accuracy: 74.73% Test Loss: 4.0400</code></pre>
+</div>
+</div>
+<p>Unfortunately, momentum didn’t help us much here. It seems pretty hard to get above ~70% accuracy and ~4.0 loss with the given data. This could be attributed to the fact that soccer datasets are definitely not linearly separable or close to it. Lets take a look at how our model’s loss evolved.</p>
+<div id="cell-45" class="cell" data-execution_count="112">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>first <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">6</span>)) </span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(train_loss, <span class="st">"--"</span>, color<span class="op">=</span><span class="st">"brown"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"Training"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(val_loss, <span class="st">"--"</span>, color<span class="op">=</span><span class="st">"orange"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"Validation"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(train_loss_m, color<span class="op">=</span><span class="st">"blue"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"Momentum Training"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(val_loss_m, color<span class="op">=</span><span class="st">"purple"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"Momentum Validation"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">"Training vs Validation Loss (All Iterations)"</span>)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">"Logistic Regression Iteration"</span>)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">"Loss"</span>)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend()</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(train_loss[:first], <span class="st">"--"</span>, color<span class="op">=</span><span class="st">"brown"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"Training"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(val_loss[:first], <span class="st">"--"</span>, color<span class="op">=</span><span class="st">"orange"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"Validation"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(train_loss_m[:first], color<span class="op">=</span><span class="st">"blue"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"Momentum Training"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(val_loss_m[:first], color<span class="op">=</span><span class="st">"purple"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"Momentum Validation"</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="ss">f"Training vs Validation Loss (First </span><span class="sc">{</span>first<span class="sc">}</span><span class="ss"> Iterations)"</span>)</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">"Logistic Regression Iteration"</span>)</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">"Loss"</span>)</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].legend()</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-20-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can see here that momentum helped us smooth our the loss curve slightly, but didn’t really help with our convergence speed. There are a myriad of reasons why we observe this behavior. The data may be quite noisy, so to speak, or our parameters may not by optimized for the problem.</p>
 
 
 </section>

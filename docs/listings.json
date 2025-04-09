@@ -2,10 +2,10 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/Implementing Logistic Regression/index.html",
       "/posts/Implementing the Perceptron Algorithm/index.html",
       "/posts/Auditing Bias/index.html",
       "/posts/Design and Impact of Automated Decision Systems/index.html",
-      "/posts/Implementing Logistic Regression/index.html",
       "/posts/Classifying Palmer Penguins/index.html"
     ]
   }
