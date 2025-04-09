@@ -64,7 +64,7 @@ class LogisticRegression(LinearModel):
             L, torch.Tensor: mean loss for the data points
         """
         s = self.score(X)
-        sig = torch.clamp(torch.sigmoid(s), 1e-7, 1 - 1e-7) # to avoid log(0)
+        sig = torch.clamp(torch.sigmoid(s), 1e-7, 1 - 1e-7) # to avoid log(0) --> nan
         return (-y * torch.log(sig) - (1 - y) * torch.log(1 - sig)).mean()
     
     def grad(self, X, y):

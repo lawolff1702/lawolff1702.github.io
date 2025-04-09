@@ -249,7 +249,7 @@ window.Quarto = {
 <p>My implementation of the logistic regression algorithm (<code>logistic.py</code>) can be found <a href="https://github.com/lawolff1702/lawolff1702.github.io/blob/6874e132c1512ee08a467716264a248c9d57cc77/posts/Implementing%20Logistic%20Regression/logistic.py">here</a>.</p>
 <section id="abstract" class="level1">
 <h1>Abstract</h1>
-<p>— insert here —</p>
+<p>In this blog post we will explore the implementation of logistic regression and focus on optimizing the binary cross-entropy loss through gradient descent with momentum. We will validate and explore the model we implemented through several experiments on synthetic datasets. We will observe both vanilla gradient descent and momentum-enhanced gradient descent. We will also examine the challenges of overfitting by working with high-dimensional data sets. Finally, we will apply our logistic regression model to predict FIFA World Cup match outcomes using real-world statistics. Through these experiments, we illustrate the advantages and trade-offs between convergence efficiency and model generalizability, and offer some thoughts on practical classification tasks.</p>
 </section>
 <section id="implementation" class="level1">
 <h1>Implementation</h1>
@@ -314,7 +314,6 @@ window.Quarto = {
 <pre><code>tensor(0.0148)</code></pre>
 </div>
 </div>
-<p><strong>ASK IN OFFICE HOURS WHY IT ISNT 0</strong></p>
 <p>Thats great! Looks like we were able to separate the data by achieving a minimal loss! Lets take a look at the line that separates our points.</p>
 <div id="cell-11" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> draw_line(w, x_min, x_max, ax, <span class="op">**</span>kwargs):</span>
@@ -621,7 +620,7 @@ window.Quarto = {
 <span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here is a first look at our raw data. Lets do some quick preprocessing to clean the dataset to make sure we have data in all fields, create a target vector, etc.</p>
-<div id="cell-36" class="cell" data-execution_count="44">
+<div id="cell-36" class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> LabelEncoder</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -640,9 +639,8 @@ window.Quarto = {
 <span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Add bias term</span></span>
 <span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>X_tensor <span class="op">=</span> torch.cat((X_features, torch.ones((X_features.shape[<span class="dv">0</span>], <span class="dv">1</span>))), <span class="dv">1</span>)</span>
 <span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Now split into train/val/test sets</span></span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>X_train_tensor, X_temp_tensor, y_train_tensor, y_temp_tensor <span class="op">=</span> train_test_split(X_tensor, y_tensor, test_size<span class="op">=</span><span class="fl">0.4</span>, random_state<span class="op">=</span><span class="dv">72</span>, stratify<span class="op">=</span>y_tensor)</span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>X_val_tensor, X_test_tensor, y_val_tensor, y_test_tensor <span class="op">=</span> train_test_split(X_temp_tensor, y_temp_tensor, test_size<span class="op">=</span><span class="fl">0.5</span>, random_state<span class="op">=</span><span class="dv">72</span>, stratify<span class="op">=</span>y_temp_tensor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>X_train_tensor, X_temp_tensor, y_train_tensor, y_temp_tensor <span class="op">=</span> train_test_split(X_tensor, y_tensor, test_size<span class="op">=</span><span class="fl">0.4</span>, random_state<span class="op">=</span><span class="dv">72</span>, stratify<span class="op">=</span>y_tensor)</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>X_val_tensor, X_test_tensor, y_val_tensor, y_test_tensor <span class="op">=</span> train_test_split(X_temp_tensor, y_temp_tensor, test_size<span class="op">=</span><span class="fl">0.5</span>, random_state<span class="op">=</span><span class="dv">72</span>, stratify<span class="op">=</span>y_temp_tensor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>I selected only World Cup Matches, dropped the matches with missing data, dropped all the matches that ended in a draw or went to penalties, and made a binary encoding for who won the match. Finally I created training, validation, and testing split. Our target value is <code>home_team_result</code>.</p>
 <p>Lets go ahead and train our model! Lets first do <strong>without momentum</strong> then with momentum!</p>
@@ -678,7 +676,7 @@ Validation Accuracy: 76.37% Validation Loss: 3.7726</code></pre>
 <pre><code>Test Accuracy: 70.33% Test Loss: 4.7601</code></pre>
 </div>
 </div>
-<p>We are still performing well on unseen data! That is a great sign for a model. Let’s explore how using momentum will affect the model</p>
+<p>We are still performing similarly on unseen data! That is a great sign for a model. Let’s explore how <strong>using momentum</strong> will affect the model.</p>
 <div id="cell-43" class="cell" data-execution_count="100">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression()</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer(LR)</span>
@@ -708,7 +706,7 @@ Test Accuracy: 74.73% Test Loss: 4.0400</code></pre>
 </div>
 </div>
 <p>Unfortunately, momentum didn’t help us much here. It seems pretty hard to get above ~70% accuracy and ~4.0 loss with the given data. This could be attributed to the fact that soccer datasets are definitely not linearly separable or close to it. Lets take a look at how our model’s loss evolved.</p>
-<div id="cell-45" class="cell" data-execution_count="112">
+<div id="cell-45" class="cell">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>first <span class="op">=</span> <span class="dv">50</span></span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">6</span>)) </span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -740,7 +738,11 @@ Test Accuracy: 74.73% Test Loss: 4.0400</code></pre>
 </div>
 </div>
 </div>
-<p>We can see here that momentum helped us smooth our the loss curve slightly, but didn’t really help with our convergence speed. There are a myriad of reasons why we observe this behavior. The data may be quite noisy, so to speak, or our parameters may not by optimized for the problem.</p>
+<p>We can see here that momentum helped us smooth our the loss curve slightly (visible in the first 50 iterations), but didn’t really help with our convergence speed. There are a myriad of reasons why we observe this behavior. The data may be quite noisy, so to speak, or our parameters may not by optimized for the problem.</p>
+</section>
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<p>In this post, we implemented a logistic regression model and conducted a series of experiments to better understand its behavior. We started off using a simple two-dimensional dataset to compare vanilla gradient descent with momentum aided descent. We demonstrated that momentum can smooth the convergence process and accelerate progress in a clean, linearly separable context. We then tackled the issue of overfitting by experimenting with scenarios where the number of features exceeded the number of data points, highlighting some of the pitfalls of excessive model complexity. Finally, we applied the model to predict World Cup match winners using real match data, We are able to achieve decent accuracy but looking at our loss evolution underscored the challenges posed by noisy, non-linearly separable, real-world datasets. In conclusion, these experiments deepened my understanding of model implementation and optimization, the balance required to prevent the dangers of overfitting, and applying logistic regression to real-world applications.</p>
 
 
 </section>
