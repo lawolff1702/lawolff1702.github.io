@@ -39,8 +39,8 @@ class LinearModel:
         RETURNS: 
             y_hat, torch.Tensor: vector predictions in {0.0, 1.0}. y_hat.size() = (n,)
         """
-
-        return 1.0 if self.score(X) > 0 else 0.0
+        scores = self.score(X)
+        return (scores > 0).float()
 
 class LogisticRegression(LinearModel):
     """
@@ -64,7 +64,7 @@ class LogisticRegression(LinearModel):
             L, torch.Tensor: mean loss for the data points
         """
         s = self.score(X)
-        sig = torch.sigmoid(s)
+        sig = torch.clamp(torch.sigmoid(s), 1e-7, 1 - 1e-7) # to avoid log(0)
         return (-y * torch.log(sig) - (1 - y) * torch.log(1 - sig)).mean()
     
     def grad(self, X, y):
