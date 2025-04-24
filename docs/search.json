@@ -32,7 +32,7 @@
     "href": "index.html",
     "title": "Lukka Wolff’s Machine Learning Blog",
     "section": "",
-    "text": "Deep Music Genre Classification\n\n\n\n\n\nDeep Music Genre Classification in Python\n\n\n\n\n\nMay 12, 2025\n\n\nLukka Wolff\n\n\n\n\n\n\n\n\n\n\n\n\nSparse Kernel Machines\n\n\n\n\n\nImplementing Sparse Kernelized Logistic Regression in Python\n\n\n\n\n\nApr 28, 2025\n\n\nLukka Wolff\n\n\n\n\n\n\n\n\n\n\n\n\nImplementing Logistic Regression\n\n\n\n\n\nImplementing Logistic Regression in Python\n\n\n\n\n\nApr 9, 2025\n\n\nLukka Wolff\n\n\n\n\n\n\n\n\n\n\n\n\nImplementing the Perceptron Algorithm\n\n\n\n\n\nImplementing the Perceptron Algorithm in Python\n\n\n\n\n\nApr 2, 2025\n\n\nLukka Wolff\n\n\n\n\n\n\n\n\n\n\n\n\nAuditing Bias\n\n\n\n\n\nAuditing Bias in Automated Decision-Making Systems\n\n\n\n\n\nMar 12, 2025\n\n\nLukka Wolff\n\n\n\n\n\n\n\n\n\n\n\n\nDesign and Impact of Automated Decision Systems\n\n\n\n\n\nDesign and Impact of Automated Decision Systems\n\n\n\n\n\nMar 5, 2025\n\n\nLukka Wolff\n\n\n\n\n\n\n\n\n\n\n\n\nClassifying Palmer Penguins\n\n\n\n\n\nClassifying Palmer Penguins using Machine Learning\n\n\n\n\n\nFeb 26, 2025\n\n\nLukka Wolff\n\n\n\n\n\n\nNo matching items"
+    "text": "Deep Music Genre Classification\n\n\n\n\n\nDeep Music Genre Classification in Python\n\n\n\n\n\nMay 12, 2025\n\n\nLukka Wolff\n\n\n\n\n\n\n\n\n\n\n\n\nSparse Kernel Machines\n\n\n\n\n\n\nMachine Learning\n\n\nSparse Kernel Machines\n\n\nLogistic Regression\n\n\n\nImplementing Sparse Kernelized Logistic Regression in Python\n\n\n\n\n\nApr 28, 2025\n\n\nLukka Wolff\n\n\n\n\n\n\n\n\n\n\n\n\nImplementing Logistic Regression\n\n\n\n\n\nImplementing Logistic Regression in Python\n\n\n\n\n\nApr 9, 2025\n\n\nLukka Wolff\n\n\n\n\n\n\n\n\n\n\n\n\nImplementing the Perceptron Algorithm\n\n\n\n\n\nImplementing the Perceptron Algorithm in Python\n\n\n\n\n\nApr 2, 2025\n\n\nLukka Wolff\n\n\n\n\n\n\n\n\n\n\n\n\nAuditing Bias\n\n\n\n\n\nAuditing Bias in Automated Decision-Making Systems\n\n\n\n\n\nMar 12, 2025\n\n\nLukka Wolff\n\n\n\n\n\n\n\n\n\n\n\n\nDesign and Impact of Automated Decision Systems\n\n\n\n\n\nDesign and Impact of Automated Decision Systems\n\n\n\n\n\nMar 5, 2025\n\n\nLukka Wolff\n\n\n\n\n\n\n\n\n\n\n\n\nClassifying Palmer Penguins\n\n\n\n\n\nClassifying Palmer Penguins using Machine Learning\n\n\n\n\n\nFeb 26, 2025\n\n\nLukka Wolff\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/Classifying Palmer Penguins/index.html",
@@ -60,6 +60,6 @@
     "href": "posts/Sparse Kernel Machines/index.html",
     "title": "Sparse Kernel Machines",
     "section": "",
-    "text": "Abstract\n– insert here —\n\n\nModel"
+    "text": "%load_ext autoreload\n%autoreload 2\nfrom kernel import KernelLogisticRegression\n\nThe autoreload extension is already loaded. To reload it, use:\n  %reload_ext autoreload\n\n\nHere is the link to my implementation of sparse ‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍kernelized ‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍logistic ‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍‍regression (kernel.py).\n\nAbstract\n– insert here —\n\n\nModel"
   }
 ]
