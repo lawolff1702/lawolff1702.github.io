@@ -163,6 +163,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="quarto-categories">
     <div class="quarto-category">Natural Language Processing</div>
     <div class="quarto-category">Neural Networks</div>
+    <div class="quarto-category">Deep Learning</div>
     <div class="quarto-category">In Progress</div>
   </div>
   </div>
@@ -901,7 +902,7 @@ dtype: int64</code></pre>
 dtype: float64</code></pre>
 </div>
 </div>
-<p>If we always guessed category 3, then we would expect an accuracy of roughly 36%. So, our task will be to see whether we can train a model to beat this.</p>
+<p>If we always guessed category 3, then we would expect an accuracy of <strong>roughly 36%</strong>. So, our task will be to see whether we can train a model to beat this.</p>
 <p>As we try to predict the genre of the track, we will use lyrics alongside some other engineered features (metadata) that we define below.</p>
 <div id="6bccea61" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>engineered_features <span class="op">=</span> [<span class="st">'dating'</span>, <span class="st">'violence'</span>, <span class="st">'world/life'</span>, <span class="st">'night/time'</span>,<span class="st">'shake the audience'</span>,<span class="st">'family/gospel'</span>, <span class="st">'romantic'</span>, <span class="st">'communication'</span>,<span class="st">'obscene'</span>, <span class="st">'music'</span>, <span class="st">'movement/places'</span>, <span class="st">'light/visual perceptions'</span>,<span class="st">'family/spiritual'</span>, <span class="st">'like/girls'</span>, <span class="st">'sadness'</span>, <span class="st">'feelings'</span>, <span class="st">'danceability'</span>,<span class="st">'loudness'</span>, <span class="st">'acousticness'</span>, <span class="st">'instrumentalness'</span>, <span class="st">'valence'</span>, <span class="st">'energy'</span>]      </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1097,7 +1098,7 @@ dtype: float64</code></pre>
 </div>
 </div>
 <p>Here is some code to help us prepare our dataset with encodings. A lot of our lyrics are different lengths so we will pad the shorter ones with 0s and truncate others that are especially long. We will make use of the torch <code>Dataset</code> class to help manage our data.</p>
-<div id="067e73fe" class="cell" data-execution_count="26">
+<div id="067e73fe" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>max_len <span class="op">=</span> <span class="dv">512</span> <span class="co"># BERT capacity</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> preprocess(df, tokenizer, max_len):</span>
@@ -1117,22 +1118,22 @@ dtype: float64</code></pre>
 <span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Lets make our encoded datasets!</p>
-<div id="09224851" class="cell" data-execution_count="27">
+<div id="09224851" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>train_data <span class="op">=</span> TextDataFromDF(df_train)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>val_data   <span class="op">=</span> TextDataFromDF(df_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here is what a single songs information looks like now:</p>
-<div id="ff257b8e" class="cell" data-execution_count="29">
+<div id="ff257b8e" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>X_tokens, X_feats, y <span class="op">=</span> train_data[<span class="dv">1</span>]</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(X_tokens, X_feats)</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[101, 4389, 18981, 2063, 2991, 2051, 2298, 19415, 3153, 2166, 2113, 9560, 7318, 9015, 7392, 2298, 3819, 5853, 4333, 2420, 4653, 9467, 3480, 3233, 9015, 7392, 9015, 7392, 9015, 7392, 2173, 16019, 6457, 8489, 2514, 2590, 10667, 6542, 11891, 14380, 2015, 4756, 2754, 9015, 7392, 9015, 7392, 9015, 7392, 9015, 7392, 5223, 7392, 19978, 2567, 3046, 2378, 16382, 2425, 2689, 3971, 15138, 19000, 11703, 20175, 10975, 18908, 5562, 2681, 25933, 4371, 2812, 7655, 2341, 11429, 2611, 5684, 4403, 2147, 2814, 2175, 2627, 2203, 2228, 2147, 2814, 2175, 2627, 2203, 2228, 2147, 2814, 2175, 2627, 2203, 2228, 2147, 2814, 2175, 2627, 2203, 2228, 5223, 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] [0.0008628127780592, 0.04239470281866, 0.3753119474059079, 0.0008628127873088, 0.0008628127698716, 0.0822631382901944, 0.00086281277135, 0.3622649125321168, 0.00086281281267, 0.0008628127783168, 0.0008628128261816, 0.0303783604382579, 0.0008628127744494, 0.030348929887327, 0.0008628129071684, 0.0666842550694092, 0.71515217155854, 0.6540778914442478, 0.3162643737594114, 0.0, 0.9525968672712284, 0.542528255136697]
-2</code></pre>
+<pre><code>[101, 3328, 2907, 2132, 2152, 4452, 2601, 3585, 4086, 3165, 2299, 3328, 3612, 3328, 4542, 3959, 10055, 6271, 3328, 3328, 2540, 3328, 3328, 3328, 2907, 2132, 2152, 4452, 2601, 3585, 4086, 3165, 2299, 3328, 3612, 3328, 4542, 3959, 10055, 6271, 3328, 3328, 2540, 3328, 3328, 3328, 3328, 2540, 3328, 3328, 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] [0.0010964912324282, 0.0010964912976541, 0.0010964912384155, 0.0010964912293336, 0.0010964912288606, 0.0010964912280702, 0.0710460412436734, 0.0010964912450082, 0.00109649124238, 0.06725964640425, 0.0010964912776641, 0.3439465725728195, 0.0010964912312102, 0.0010964912435438, 0.5013003710524483, 0.0010964912281679, 0.2895050362828983, 0.6547445068328077, 0.4367464224361671, 2.2165991902834004e-05, 0.2755564715581204, 0.3703507056476638]
+3</code></pre>
 </div>
 </div>
 <p>We are going to be feeding data in in batches, so we will need a dataloader which necessitates a collate function to ensure our we are imputing tensors of the right size.</p>
-<div id="a751a3bd" class="cell" data-execution_count="47">
+<div id="a751a3bd" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> collate(data):</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    tokens <span class="op">=</span> torch.tensor([d[<span class="dv">0</span>] <span class="cf">for</span> d <span class="kw">in</span> data], dtype<span class="op">=</span>torch.<span class="bu">long</span>)</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    engineered <span class="op">=</span> torch.tensor([d[<span class="dv">1</span>] <span class="cf">for</span> d <span class="kw">in</span> data], dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
@@ -1143,55 +1144,55 @@ dtype: float64</code></pre>
 <span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>val_loader <span class="op">=</span> DataLoader(val_data, batch_size<span class="op">=</span><span class="dv">8</span>, shuffle<span class="op">=</span><span class="va">True</span>, collate_fn <span class="op">=</span> collate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here is what a batch of data looks like. The predictor data is now a tensor in which the entries give token indices, padded with 0s and another tensor with the values of our engineered features. For visualization purposes we’ll show only the first 2 rows:</p>
-<div id="b18de88b" class="cell" data-execution_count="48">
+<div id="b18de88b" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(train_loader))</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>X[:<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="48">
-<pre><code>(tensor([[  101,  4284,  2627,  ...,     0,     0,     0],
-         [  101, 21110,  2638,  ...,     0,     0,     0],
-         [  101,  3147,  6271,  ...,     0,     0,     0],
+<div class="cell-output cell-output-display" data-execution_count="18">
+<pre><code>(tensor([[ 101, 4101, 2614,  ...,    0,    0,    0],
+         [ 101, 3441, 2425,  ...,    0,    0,    0],
+         [ 101, 2293, 6171,  ...,    0,    0,    0],
          ...,
-         [  101,  2191,  3066,  ...,     0,     0,     0],
-         [  101,  6428,  3114,  ...,     0,     0,     0],
-         [  101,  4086,  2189,  ...,     0,     0,     0]]),
- tensor([[6.0496e-04, 1.3729e-01, 3.0337e-01, 6.0496e-04, 6.0496e-04, 6.0496e-04,
-          6.0496e-04, 6.0496e-04, 1.4679e-01, 6.0496e-04, 1.3474e-01, 8.5468e-02,
-          4.1353e-02, 6.0496e-04, 6.0496e-04, 8.4843e-02, 5.8410e-01, 5.1381e-01,
-          2.5100e-01, 3.4818e-01, 6.2490e-01, 4.2841e-01],
-         [7.5188e-03, 3.2063e-01, 7.5188e-03, 4.2682e-01, 7.5188e-03, 7.5188e-03,
-          7.5188e-03, 7.5188e-03, 7.5188e-03, 7.5188e-03, 7.5188e-03, 7.5188e-03,
-          1.3225e-01, 7.5188e-03, 7.5188e-03, 7.5188e-03, 1.7687e-01, 6.4375e-01,
-          7.2088e-01, 4.5850e-03, 9.3157e-02, 3.4332e-01],
-         [2.2838e-02, 3.8766e-01, 7.9745e-04, 7.9745e-04, 7.9745e-04, 7.9745e-04,
-          2.8809e-01, 7.9745e-04, 7.9745e-04, 1.5163e-01, 7.9745e-04, 7.9745e-04,
-          5.8331e-02, 4.8705e-02, 7.9745e-04, 7.9745e-04, 4.0864e-01, 6.7723e-01,
-          2.3594e-01, 1.6296e-06, 2.4258e-01, 4.5644e-01],
-         [1.0121e-03, 1.0121e-03, 3.2742e-01, 1.0121e-03, 1.8048e-02, 2.0057e-01,
-          1.0121e-03, 1.0121e-03, 1.0121e-03, 4.8896e-02, 4.8224e-02, 1.0121e-03,
-          1.7849e-01, 1.4544e-01, 1.0121e-03, 1.0121e-03, 7.8014e-01, 6.8220e-01,
-          1.7068e-01, 2.1053e-04, 9.4435e-01, 6.7166e-01],
-         [4.4768e-02, 3.9799e-01, 1.3495e-03, 2.7231e-02, 1.3495e-03, 1.3495e-03,
-          3.3576e-01, 4.4507e-02, 1.3495e-03, 1.3495e-03, 1.3495e-03, 1.3495e-03,
-          1.3495e-03, 1.3495e-03, 1.3495e-03, 1.3220e-01, 1.8770e-01, 7.8353e-01,
-          2.0080e-05, 6.3360e-01, 4.9567e-02, 9.8899e-01],
-         [1.0741e-03, 9.2244e-02, 1.0741e-03, 9.9545e-02, 1.0741e-03, 1.0741e-03,
-          1.0741e-03, 1.2025e-01, 1.0741e-03, 1.1366e-01, 1.0741e-03, 1.0741e-03,
-          8.2266e-02, 1.0741e-03, 4.0841e-01, 1.0741e-03, 4.7363e-01, 7.6312e-01,
-          1.3444e-03, 5.3340e-03, 7.6814e-01, 8.1881e-01],
-         [9.7466e-04, 6.4592e-01, 9.7466e-04, 9.7466e-04, 9.7466e-04, 9.7466e-04,
-          9.7466e-04, 1.6118e-01, 9.7466e-04, 9.7466e-04, 9.7466e-04, 9.7466e-04,
-          9.7466e-04, 1.7731e-01, 9.7466e-04, 9.7466e-04, 5.0829e-01, 6.4105e-01,
-          1.2741e-03, 3.2389e-01, 1.1274e-01, 8.5685e-01],
-         [1.9493e-03, 1.9493e-03, 1.9493e-03, 1.1210e-01, 3.8986e-02, 1.9493e-03,
-          6.7869e-02, 1.9493e-03, 1.9493e-03, 4.3615e-01, 1.9493e-03, 1.9493e-03,
-          3.1760e-01, 1.9493e-03, 1.9493e-03, 1.9493e-03, 6.7616e-01, 6.7338e-01,
-          6.7369e-01, 9.7470e-03, 8.5367e-01, 3.3231e-01]]))</code></pre>
+         [ 101, 4542, 2228,  ...,    0,    0,    0],
+         [ 101, 2300, 2307,  ...,    0,    0,    0],
+         [ 101, 3336, 2088,  ...,    0,    0,    0]]),
+ tensor([[5.8480e-03, 5.8480e-03, 5.8480e-03, 5.8480e-03, 9.2967e-02, 5.8480e-03,
+          5.8480e-03, 5.8480e-03, 5.6022e-01, 2.5324e-01, 5.8480e-03, 5.8480e-03,
+          5.8480e-03, 5.8480e-03, 5.8480e-03, 5.8480e-03, 5.5919e-01, 6.8002e-01,
+          4.1064e-01, 9.0283e-01, 7.5577e-01, 6.3863e-01],
+         [6.1200e-04, 6.1200e-04, 3.2425e-01, 1.6469e-01, 6.1200e-04, 6.1200e-04,
+          6.1200e-04, 3.7032e-01, 6.1200e-04, 6.1200e-04, 3.4029e-02, 6.1200e-04,
+          6.1200e-04, 6.1200e-04, 8.5875e-02, 6.1200e-04, 5.9818e-01, 6.7177e-01,
+          2.5201e-01, 4.2409e-02, 3.5697e-01, 5.4553e-01],
+         [4.3860e-03, 1.9015e-01, 4.3860e-03, 4.3860e-03, 4.3860e-03, 4.3860e-03,
+          4.0664e-01, 4.3860e-03, 4.3860e-03, 2.1453e-01, 4.3860e-03, 4.3860e-03,
+          1.2289e-01, 4.3860e-03, 4.3860e-03, 4.3860e-03, 4.0973e-01, 6.1988e-01,
+          9.5783e-01, 9.7672e-05, 9.4188e-02, 1.8516e-01],
+         [1.2837e-03, 1.2437e-01, 5.4941e-01, 1.0511e-01, 1.2837e-03, 1.2837e-03,
+          1.2837e-03, 1.2837e-03, 1.2837e-03, 1.2837e-03, 1.2837e-03, 1.2837e-03,
+          1.2837e-03, 1.2837e-03, 1.3983e-01, 2.4200e-02, 6.0685e-01, 6.6156e-01,
+          1.7169e-01, 1.4575e-03, 2.8895e-01, 5.2551e-01],
+         [1.8674e-01, 2.4353e-01, 1.4225e-03, 1.4225e-03, 6.4501e-02, 1.4225e-03,
+          9.2653e-02, 1.4225e-03, 1.4225e-03, 1.4225e-03, 1.4225e-03, 1.4225e-03,
+          1.4225e-03, 1.4225e-03, 3.9267e-01, 1.4225e-03, 6.9024e-01, 3.4205e-01,
+          9.8092e-01, 9.4838e-01, 6.6509e-01, 8.7259e-02],
+         [7.5188e-04, 6.6508e-02, 1.1153e-01, 7.5188e-04, 7.5188e-04, 1.7943e-02,
+          7.5188e-04, 2.0908e-01, 7.5188e-04, 7.5188e-04, 7.5188e-04, 7.5188e-04,
+          7.5188e-04, 7.0969e-02, 3.1324e-01, 7.5188e-04, 5.2345e-01, 5.0791e-01,
+          5.2299e-03, 5.2227e-03, 7.3825e-01, 3.1830e-01],
+         [1.1198e-03, 5.2728e-01, 1.1198e-03, 1.1198e-03, 1.1198e-03, 1.1198e-03,
+          1.1198e-03, 1.1198e-03, 1.1198e-03, 1.1198e-03, 1.1198e-03, 1.1198e-03,
+          1.1770e-01, 1.1198e-03, 6.7696e-02, 1.1198e-03, 6.2742e-01, 7.0423e-01,
+          3.7751e-01, 1.2348e-04, 4.6311e-01, 6.4063e-01],
+         [1.4427e-01, 1.3495e-03, 3.0550e-01, 1.3495e-03, 1.3495e-03, 1.6269e-01,
+          1.3495e-03, 1.3495e-03, 1.3495e-03, 3.5433e-02, 1.3495e-03, 1.4791e-01,
+          1.3495e-03, 1.3495e-03, 1.5215e-01, 1.3495e-03, 5.7869e-01, 3.6984e-01,
+          9.3173e-01, 3.1883e-01, 9.0066e-02, 1.3211e-01]]))</code></pre>
 </div>
 </div>
-<div id="13b5056f" class="cell" data-execution_count="49">
+<div id="13b5056f" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>y[:<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="49">
-<pre><code>tensor([1, 1])</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<pre><code>tensor([1, 3])</code></pre>
 </div>
 </div>
 </section>
@@ -1204,7 +1205,9 @@ dtype: float64</code></pre>
 <li>Using Lyrics and Metadata to Classify</li>
 </ul>
 <p>Lets build a model for classifying genres based on lyrics first.</p>
-<div id="aba4f4e1" class="cell" data-execution_count="91">
+<section id="lyrical-classification" class="level2">
+<h2 class="anchored" data-anchor-id="lyrical-classification">Lyrical Classification</h2>
+<div id="aba4f4e1" class="cell" data-execution_count="46">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TextClassificationModel(nn.Module):</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>,vocab_size, embedding_dim, max_len, num_class):</span>
@@ -1212,42 +1215,45 @@ dtype: float64</code></pre>
 <span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.embedding <span class="op">=</span> nn.Embedding(vocab_size<span class="op">+</span><span class="dv">1</span>, embedding_dim)</span>
 <span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout <span class="op">=</span> nn.Dropout(<span class="fl">0.2</span>)</span>
 <span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.fc <span class="op">=</span> nn.Linear(embedding_dim, num_class) <span class="co"># max_len*embedding_dim</span></span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.relu <span class="op">=</span> nn.ReLU()</span>
 <span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
 <span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.embedding(x)</span>
-<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.dropout(x)</span>
-<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.mean(axis <span class="op">=</span> <span class="dv">1</span>)</span>
-<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># x = torch.flatten(x, 1)</span></span>
-<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.fc(x)</span>
-<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.relu(x)</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.dropout(x)</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.mean(axis <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># x = torch.flatten(x, 1)</span></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.fc(x)</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="ec0d5f4d" class="cell">
+<p>Our model begins with the embedding layer where each word is looked up in an embedding table and turned into a learned vector of size <code>embedding_dim</code>. We then pass the embedding into a dropout layer where 20% of the embedding vectors are randomly zeroed. This is a form of regularization step meant to help us not be over-reliant on certain tokens. Our mean-pool layer reduces our dimension by averaging all token embeddings so each song is now a fixed-size vector. Finally, our linear layer gives us our probabilities for each genre.</p>
+<div id="ec0d5f4d" class="cell" data-execution_count="47">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>vocab_size <span class="op">=</span> <span class="bu">len</span>(tokenizer.vocab)</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>embedding_dim <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>embedding_dim <span class="op">=</span> <span class="dv">25</span></span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>num_class <span class="op">=</span> <span class="bu">len</span>(genres)</span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>text_model <span class="op">=</span> TextClassificationModel(vocab_size, embedding_dim, max_len, num_class).to(device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="30b7a935" class="cell" data-execution_count="96">
+<div id="30b7a935" class="cell" data-execution_count="48">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>summary(text_model, input_Size <span class="op">=</span> (<span class="dv">8</span>, max_len))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="96">
+<div class="cell-output cell-output-display" data-execution_count="48">
 <pre><code>=================================================================
 Layer (type:depth-idx)                   Param #
 =================================================================
 TextClassificationModel                  --
-├─Embedding: 1-1                         305,230
+├─Embedding: 1-1                         763,075
 ├─Dropout: 1-2                           --
-├─Linear: 1-3                            44
+├─Linear: 1-3                            104
+├─ReLU: 1-4                              --
 =================================================================
-Total params: 305,274
-Trainable params: 305,274
+Total params: 763,179
+Trainable params: 763,179
 Non-trainable params: 0
 =================================================================</code></pre>
 </div>
 </div>
-<div id="cda0fbd9" class="cell" data-execution_count="97">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(model, dataloader):</span>
+<div id="cda0fbd9" class="cell" data-execution_count="56">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(model, dataloader, mode<span class="op">=</span><span class="st">"lyrics"</span>):</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span><span class="fl">1e-3</span>)</span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    loss_fn <span class="op">=</span> torch.nn.CrossEntropyLoss()</span>
 <span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -1258,79 +1264,227 @@ Non-trainable params: 0
 <span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> X, y <span class="kw">in</span> dataloader:</span>
 <span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># unpack and move to device</span></span>
 <span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>        tokens, engineered <span class="op">=</span> X</span>
-<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>        tokens <span class="op">=</span> tokens.to(device)</span>
-<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>        engineered <span class="op">=</span> engineered.to(device)</span>
-<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> y.to(device)</span>
-<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># zero gradients</span></span>
-<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
-<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># form prediction on batch</span></span>
-<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>        predicted_label <span class="op">=</span> model(tokens)</span>
-<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>        <span class="co"># evaluate loss on prediction</span></span>
-<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> loss_fn(predicted_label, y)</span>
-<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># compute gradient</span></span>
-<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
-<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>        <span class="co"># take an optimization step</span></span>
-<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
-<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>                </span>
-<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># for printing accuracy</span></span>
-<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>        total_acc <span class="op">+=</span> (predicted_label.argmax(<span class="dv">1</span>) <span class="op">==</span> y).<span class="bu">sum</span>().item()</span>
-<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a>        total_count <span class="op">+=</span> y.size(<span class="dv">0</span>)</span>
-<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'| epoch </span><span class="sc">{</span>epoch<span class="sc">:3d}</span><span class="ss"> | train accuracy </span><span class="sc">{</span>total_acc<span class="op">/</span>total_count<span class="sc">:8.3f}</span><span class="ss"> | time: </span><span class="sc">{</span>time<span class="sc">.</span>time() <span class="op">-</span> epoch_start_time<span class="sc">:5.2f}</span><span class="ss">s'</span>)</span>
-<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> accuracy(model, dataloader):</span>
-<span id="cb32-34"><a href="#cb32-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-35"><a href="#cb32-35" aria-hidden="true" tabindex="-1"></a>    total_acc, total_count <span class="op">=</span> <span class="dv">0</span>, <span class="dv">0</span></span>
-<span id="cb32-36"><a href="#cb32-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-37"><a href="#cb32-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
-<span id="cb32-38"><a href="#cb32-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> X, y <span class="kw">in</span> dataloader:</span>
-<span id="cb32-39"><a href="#cb32-39" aria-hidden="true" tabindex="-1"></a>            <span class="co"># unpack and move to device</span></span>
-<span id="cb32-40"><a href="#cb32-40" aria-hidden="true" tabindex="-1"></a>            tokens, engineered <span class="op">=</span> X</span>
-<span id="cb32-41"><a href="#cb32-41" aria-hidden="true" tabindex="-1"></a>            tokens <span class="op">=</span> tokens.to(device)</span>
-<span id="cb32-42"><a href="#cb32-42" aria-hidden="true" tabindex="-1"></a>            engineered <span class="op">=</span> engineered.to(device)</span>
-<span id="cb32-43"><a href="#cb32-43" aria-hidden="true" tabindex="-1"></a>            y <span class="op">=</span> y.to(device)</span>
-<span id="cb32-44"><a href="#cb32-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-45"><a href="#cb32-45" aria-hidden="true" tabindex="-1"></a>            predicted_label <span class="op">=</span> model(tokens)</span>
-<span id="cb32-46"><a href="#cb32-46" aria-hidden="true" tabindex="-1"></a>            total_acc <span class="op">+=</span> (predicted_label.argmax(<span class="dv">1</span>) <span class="op">==</span> y).<span class="bu">sum</span>().item()</span>
-<span id="cb32-47"><a href="#cb32-47" aria-hidden="true" tabindex="-1"></a>            total_count <span class="op">+=</span> y.size(<span class="dv">0</span>)</span>
-<span id="cb32-48"><a href="#cb32-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total_acc<span class="op">/</span>total_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> y.to(device)</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> mode <span class="op">==</span> <span class="st">"lyrics"</span>:</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>            data <span class="op">=</span> tokens.to(device)</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> mode <span class="op">==</span> <span class="st">"engineered"</span>:</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>            data <span class="op">=</span> engineered.to(device)</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>            data <span class="op">=</span> X</span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># zero gradients</span></span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>        <span class="co"># form prediction on batch</span></span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>        predicted_label <span class="op">=</span> model(data)</span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a>        <span class="co"># evaluate loss on prediction</span></span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> loss_fn(predicted_label, y)</span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># compute gradient</span></span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a>        <span class="co"># take an optimization step</span></span>
+<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a>        <span class="co"># for printing accuracy</span></span>
+<span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a>        total_acc <span class="op">+=</span> (predicted_label.argmax(<span class="dv">1</span>) <span class="op">==</span> y).<span class="bu">sum</span>().item()</span>
+<span id="cb32-34"><a href="#cb32-34" aria-hidden="true" tabindex="-1"></a>        total_count <span class="op">+=</span> y.size(<span class="dv">0</span>)</span>
+<span id="cb32-35"><a href="#cb32-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-36"><a href="#cb32-36" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'| epoch </span><span class="sc">{</span>epoch<span class="sc">:3d}</span><span class="ss"> | train accuracy </span><span class="sc">{</span>total_acc<span class="op">/</span>total_count<span class="sc">:8.3f}</span><span class="ss"> | time: </span><span class="sc">{</span>time<span class="sc">.</span>time() <span class="op">-</span> epoch_start_time<span class="sc">:5.2f}</span><span class="ss">s'</span>)</span>
+<span id="cb32-37"><a href="#cb32-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-38"><a href="#cb32-38" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> accuracy(model, dataloader, mode<span class="op">=</span><span class="st">"lyrics"</span>):</span>
+<span id="cb32-39"><a href="#cb32-39" aria-hidden="true" tabindex="-1"></a>    total_acc, total_count <span class="op">=</span> <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="cb32-40"><a href="#cb32-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-41"><a href="#cb32-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb32-42"><a href="#cb32-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> X, y <span class="kw">in</span> dataloader:</span>
+<span id="cb32-43"><a href="#cb32-43" aria-hidden="true" tabindex="-1"></a>            <span class="co"># unpack and move to device</span></span>
+<span id="cb32-44"><a href="#cb32-44" aria-hidden="true" tabindex="-1"></a>            tokens, engineered <span class="op">=</span> X</span>
+<span id="cb32-45"><a href="#cb32-45" aria-hidden="true" tabindex="-1"></a>            y <span class="op">=</span> y.to(device)</span>
+<span id="cb32-46"><a href="#cb32-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-47"><a href="#cb32-47" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> mode <span class="op">==</span> <span class="st">"lyrics"</span>:</span>
+<span id="cb32-48"><a href="#cb32-48" aria-hidden="true" tabindex="-1"></a>                data <span class="op">=</span> tokens.to(device)</span>
+<span id="cb32-49"><a href="#cb32-49" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> mode <span class="op">==</span> <span class="st">"engineered"</span>:</span>
+<span id="cb32-50"><a href="#cb32-50" aria-hidden="true" tabindex="-1"></a>                data <span class="op">=</span> engineered.to(device)</span>
+<span id="cb32-51"><a href="#cb32-51" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> mode <span class="op">==</span> <span class="st">"both"</span>:</span>
+<span id="cb32-52"><a href="#cb32-52" aria-hidden="true" tabindex="-1"></a>                data <span class="op">=</span> X</span>
+<span id="cb32-53"><a href="#cb32-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-54"><a href="#cb32-54" aria-hidden="true" tabindex="-1"></a>            predicted_label <span class="op">=</span> model(data)</span>
+<span id="cb32-55"><a href="#cb32-55" aria-hidden="true" tabindex="-1"></a>            total_acc <span class="op">+=</span> (predicted_label.argmax(<span class="dv">1</span>) <span class="op">==</span> y).<span class="bu">sum</span>().item()</span>
+<span id="cb32-56"><a href="#cb32-56" aria-hidden="true" tabindex="-1"></a>            total_count <span class="op">+=</span> y.size(<span class="dv">0</span>)</span>
+<span id="cb32-57"><a href="#cb32-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total_acc<span class="op">/</span>total_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="b5303ff7" class="cell" data-execution_count="102">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>EPOCHS <span class="op">=</span> <span class="dv">20</span></span>
+<div id="b5303ff7" class="cell" data-execution_count="50">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>EPOCHS <span class="op">=</span> <span class="dv">30</span></span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>):</span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    train(text_model, train_loader)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    train(text_model, train_loader, <span class="st">"lyrics"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>| epoch   1 | train accuracy    0.762 | time:  3.24s
-| epoch   2 | train accuracy    0.761 | time:  3.09s
-| epoch   3 | train accuracy    0.770 | time:  3.26s
-| epoch   4 | train accuracy    0.770 | time:  3.10s
-| epoch   5 | train accuracy    0.778 | time:  3.13s
-| epoch   6 | train accuracy    0.781 | time:  3.60s
-| epoch   7 | train accuracy    0.782 | time:  3.14s
-| epoch   8 | train accuracy    0.783 | time:  3.23s
-| epoch   9 | train accuracy    0.787 | time:  3.29s
-| epoch  10 | train accuracy    0.791 | time:  3.10s
-| epoch  11 | train accuracy    0.793 | time:  3.07s
-| epoch  12 | train accuracy    0.802 | time:  2.87s
-| epoch  13 | train accuracy    0.803 | time:  2.84s
-| epoch  14 | train accuracy    0.806 | time:  2.94s
-| epoch  15 | train accuracy    0.804 | time:  3.00s
-| epoch  16 | train accuracy    0.807 | time:  3.20s
-| epoch  17 | train accuracy    0.813 | time:  3.11s
-| epoch  18 | train accuracy    0.813 | time:  3.10s
-| epoch  19 | train accuracy    0.816 | time:  2.96s
-| epoch  20 | train accuracy    0.820 | time:  3.30s</code></pre>
+<pre><code>| epoch   1 | train accuracy    0.372 | time:  4.24s
+| epoch   2 | train accuracy    0.387 | time:  4.41s
+| epoch   3 | train accuracy    0.398 | time:  4.32s
+| epoch   4 | train accuracy    0.401 | time:  4.18s
+| epoch   5 | train accuracy    0.405 | time:  4.29s
+| epoch   6 | train accuracy    0.414 | time:  4.44s
+| epoch   7 | train accuracy    0.421 | time:  4.47s
+| epoch   8 | train accuracy    0.436 | time:  4.39s
+| epoch   9 | train accuracy    0.439 | time:  4.24s
+| epoch  10 | train accuracy    0.454 | time:  4.53s
+| epoch  11 | train accuracy    0.467 | time:  4.73s
+| epoch  12 | train accuracy    0.478 | time:  4.51s
+| epoch  13 | train accuracy    0.492 | time:  4.54s
+| epoch  14 | train accuracy    0.499 | time:  4.32s
+| epoch  15 | train accuracy    0.517 | time:  4.40s
+| epoch  16 | train accuracy    0.527 | time:  4.43s
+| epoch  17 | train accuracy    0.546 | time:  4.27s
+| epoch  18 | train accuracy    0.557 | time:  4.38s
+| epoch  19 | train accuracy    0.567 | time:  4.41s
+| epoch  20 | train accuracy    0.576 | time:  4.47s
+| epoch  21 | train accuracy    0.588 | time:  4.51s
+| epoch  22 | train accuracy    0.597 | time:  4.36s
+| epoch  23 | train accuracy    0.610 | time:  4.42s
+| epoch  24 | train accuracy    0.619 | time:  4.40s
+| epoch  25 | train accuracy    0.629 | time:  4.24s
+| epoch  26 | train accuracy    0.637 | time:  4.25s
+| epoch  27 | train accuracy    0.643 | time:  4.19s
+| epoch  28 | train accuracy    0.649 | time:  4.34s
+| epoch  29 | train accuracy    0.660 | time:  4.56s
+| epoch  30 | train accuracy    0.664 | time:  4.17s</code></pre>
 </div>
 </div>
-<div id="3e236043" class="cell" data-execution_count="103">
+<div id="3e236043" class="cell" data-execution_count="51">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>accuracy(text_model, val_loader)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="103">
-<pre><code>0.5631369073992025</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="51">
+<pre><code>0.5604785112981834</code></pre>
 </div>
+</div>
+</section>
+<section id="engineered-features-classification" class="level2">
+<h2 class="anchored" data-anchor-id="engineered-features-classification">Engineered Features Classification</h2>
+<div id="3c49c4b4" class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MetadataClassificationModel(nn.Module):</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, num_features, num_class):</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pipeline <span class="op">=</span> nn.Sequential(</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>            nn.Linear(num_features, <span class="dv">18</span>), </span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">18</span>, <span class="dv">12</span>), </span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">12</span>, <span class="dv">8</span>), </span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">8</span>, num_class)</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.pipeline(x)</span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> predict(<span class="va">self</span>, x): </span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.score(x) <span class="op">&gt;</span> <span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="c92120b4" class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>num_features <span class="op">=</span> <span class="bu">len</span>(engineered_features)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>meta_model <span class="op">=</span> MetadataClassificationModel(num_features, num_class).to(device)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>summary(meta_model, input_Size <span class="op">=</span> (<span class="dv">8</span>, max_len))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="53">
+<pre><code>=================================================================
+Layer (type:depth-idx)                   Param #
+=================================================================
+MetadataClassificationModel              --
+├─Sequential: 1-1                        --
+│    └─Linear: 2-1                       414
+│    └─ReLU: 2-2                         --
+│    └─Linear: 2-3                       228
+│    └─ReLU: 2-4                         --
+│    └─Linear: 2-5                       104
+│    └─ReLU: 2-6                         --
+│    └─Linear: 2-7                       36
+=================================================================
+Total params: 782
+Trainable params: 782
+Non-trainable params: 0
+=================================================================</code></pre>
+</div>
+</div>
+<div id="3f986713" class="cell" data-execution_count="54">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>EPOCHS <span class="op">=</span> <span class="dv">30</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, EPOCHS <span class="op">+</span> <span class="dv">1</span>):</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    train(meta_model, train_loader, <span class="st">"engineered"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>| epoch   1 | train accuracy    0.517 | time:  4.36s
+| epoch   2 | train accuracy    0.613 | time:  4.32s
+| epoch   3 | train accuracy    0.626 | time:  4.22s
+| epoch   4 | train accuracy    0.631 | time:  4.11s
+| epoch   5 | train accuracy    0.634 | time:  4.17s
+| epoch   6 | train accuracy    0.636 | time:  4.46s
+| epoch   7 | train accuracy    0.639 | time:  4.35s
+| epoch   8 | train accuracy    0.638 | time:  4.23s
+| epoch   9 | train accuracy    0.642 | time:  4.40s
+| epoch  10 | train accuracy    0.640 | time:  3.97s
+| epoch  11 | train accuracy    0.639 | time:  3.61s
+| epoch  12 | train accuracy    0.641 | time:  3.81s
+| epoch  13 | train accuracy    0.646 | time:  3.63s
+| epoch  14 | train accuracy    0.644 | time:  3.85s
+| epoch  15 | train accuracy    0.647 | time:  4.24s
+| epoch  16 | train accuracy    0.651 | time:  3.83s
+| epoch  17 | train accuracy    0.654 | time:  3.82s
+| epoch  18 | train accuracy    0.656 | time:  3.88s
+| epoch  19 | train accuracy    0.655 | time:  3.87s
+| epoch  20 | train accuracy    0.661 | time:  3.88s
+| epoch  21 | train accuracy    0.659 | time:  4.00s
+| epoch  22 | train accuracy    0.659 | time:  3.95s
+| epoch  23 | train accuracy    0.658 | time:  4.23s
+| epoch  24 | train accuracy    0.661 | time:  3.91s
+| epoch  25 | train accuracy    0.660 | time:  4.00s
+| epoch  26 | train accuracy    0.658 | time:  3.88s
+| epoch  27 | train accuracy    0.663 | time:  4.01s
+| epoch  28 | train accuracy    0.660 | time:  4.00s
+| epoch  29 | train accuracy    0.669 | time:  3.98s
+| epoch  30 | train accuracy    0.665 | time:  4.04s</code></pre>
+</div>
+</div>
+<div id="5e474de1" class="cell" data-execution_count="55">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>accuracy(meta_model, val_loader, <span class="st">"engineered"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="55">
+<pre><code>0.6570669029685423</code></pre>
+</div>
+</div>
+</section>
+<section id="combined-feature-classification" class="level2">
+<h2 class="anchored" data-anchor-id="combined-feature-classification">Combined Feature Classification</h2>
+<div id="eba8a02f" class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CombinedNet(nn.Module):</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pipeline <span class="op">=</span> nn.Sequential(</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>            nn.Linear(num_features, <span class="dv">18</span>), </span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">18</span>, <span class="dv">12</span>), </span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">12</span>, <span class="dv">8</span>), </span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(),</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">8</span>, num_class)</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>        x_1, x_2 <span class="op">=</span> x</span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a>        x_1 <span class="op">=</span> x_1.to(device)  </span>
+<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a>        x_2 <span class="op">=</span> x_2.to(device)</span>
+<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># text pipeline: try embedding! </span></span>
+<span id="cb44-22"><a href="#cb44-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># x_1 = ...</span></span>
+<span id="cb44-23"><a href="#cb44-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-24"><a href="#cb44-24" aria-hidden="true" tabindex="-1"></a>        <span class="co"># engineered features: fully-connected Linear layers are fine</span></span>
+<span id="cb44-25"><a href="#cb44-25" aria-hidden="true" tabindex="-1"></a>        <span class="co"># x_2 = ...</span></span>
+<span id="cb44-26"><a href="#cb44-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-27"><a href="#cb44-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ensure that both x_1 and x_2 are 2-d tensors, flattening if necessary</span></span>
+<span id="cb44-28"><a href="#cb44-28" aria-hidden="true" tabindex="-1"></a>        <span class="co"># then, combine them with: </span></span>
+<span id="cb44-29"><a href="#cb44-29" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch.cat(x_1, x_2, <span class="dv">1</span>)</span>
+<span id="cb44-30"><a href="#cb44-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># pass x through a couple more fully-connected layers and return output</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
