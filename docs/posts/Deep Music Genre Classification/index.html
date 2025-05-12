@@ -23,10 +23,44 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -69,6 +103,9 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -125,6 +162,7 @@ ul.task-list li input[type="checkbox"] {
 <h1 class="title">Deep Music Genre Classification</h1>
   <div class="quarto-categories">
     <div class="quarto-category">Natural Language Processing</div>
+    <div class="quarto-category">Neural Networks</div>
     <div class="quarto-category">In Progress</div>
   </div>
   </div>
@@ -164,8 +202,1057 @@ ul.task-list li input[type="checkbox"] {
 <h1>Abstract</h1>
 <p>– Enter Here –</p>
 </section>
-<section id="section" class="level1">
-<h1></h1>
+<section id="data" class="level1">
+<h1>Data</h1>
+<div id="7dad640f" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch <span class="im">import</span> nn</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> Dataset, DataLoader</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchinfo <span class="im">import</span> summary</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># for train-test split</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># for suppressing bugged warnings from torchinfo</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">"ignore"</span>, category <span class="op">=</span> <span class="pp">UserWarning</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># tokenizers from HuggingFace</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> BertTokenizer</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> torch.device(<span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>c:\Users\lukka\anaconda3\envs\ml-0451\lib\site-packages\tqdm\auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
+  from .autonotebook import tqdm as notebook_tqdm</code></pre>
+</div>
+</div>
+<p>We are loading in a <a href="https://www.kaggle.com/datasets/saurabhshahane/music-dataset-1950-to-2019">Kaggle dataset</a> that contains information about music made between the years 1950 and 2019 collected through Spotify. The dataset contains lyrics, artist info, track names, etc. Importantly it also includes music metadata like sadness, danceability, loudness, acousticness, etc.</p>
+<div id="9f297de2" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/PhilChodrow/PIC16B/master/datasets/tcc_ceds_music.csv"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Lets have a look at some of the raw data!</p>
+<div id="58bdc5ec" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Unnamed: 0</th>
+<th data-quarto-table-cell-role="th">artist_name</th>
+<th data-quarto-table-cell-role="th">track_name</th>
+<th data-quarto-table-cell-role="th">release_date</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">lyrics</th>
+<th data-quarto-table-cell-role="th">len</th>
+<th data-quarto-table-cell-role="th">dating</th>
+<th data-quarto-table-cell-role="th">violence</th>
+<th data-quarto-table-cell-role="th">world/life</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">sadness</th>
+<th data-quarto-table-cell-role="th">feelings</th>
+<th data-quarto-table-cell-role="th">danceability</th>
+<th data-quarto-table-cell-role="th">loudness</th>
+<th data-quarto-table-cell-role="th">acousticness</th>
+<th data-quarto-table-cell-role="th">instrumentalness</th>
+<th data-quarto-table-cell-role="th">valence</th>
+<th data-quarto-table-cell-role="th">energy</th>
+<th data-quarto-table-cell-role="th">topic</th>
+<th data-quarto-table-cell-role="th">age</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>mukesh</td>
+<td>mohabbat bhi jhoothi</td>
+<td>1950</td>
+<td>pop</td>
+<td>hold time feel break feel untrue convince spea...</td>
+<td>95</td>
+<td>0.000598</td>
+<td>0.063746</td>
+<td>0.000598</td>
+<td>...</td>
+<td>0.380299</td>
+<td>0.117175</td>
+<td>0.357739</td>
+<td>0.454119</td>
+<td>0.997992</td>
+<td>0.901822</td>
+<td>0.339448</td>
+<td>0.137110</td>
+<td>sadness</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>4</td>
+<td>frankie laine</td>
+<td>i believe</td>
+<td>1950</td>
+<td>pop</td>
+<td>believe drop rain fall grow believe darkest ni...</td>
+<td>51</td>
+<td>0.035537</td>
+<td>0.096777</td>
+<td>0.443435</td>
+<td>...</td>
+<td>0.001284</td>
+<td>0.001284</td>
+<td>0.331745</td>
+<td>0.647540</td>
+<td>0.954819</td>
+<td>0.000002</td>
+<td>0.325021</td>
+<td>0.263240</td>
+<td>world/life</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>6</td>
+<td>johnnie ray</td>
+<td>cry</td>
+<td>1950</td>
+<td>pop</td>
+<td>sweetheart send letter goodbye secret feel bet...</td>
+<td>24</td>
+<td>0.002770</td>
+<td>0.002770</td>
+<td>0.002770</td>
+<td>...</td>
+<td>0.002770</td>
+<td>0.225422</td>
+<td>0.456298</td>
+<td>0.585288</td>
+<td>0.840361</td>
+<td>0.000000</td>
+<td>0.351814</td>
+<td>0.139112</td>
+<td>music</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>10</td>
+<td>pérez prado</td>
+<td>patricia</td>
+<td>1950</td>
+<td>pop</td>
+<td>kiss lips want stroll charm mambo chacha merin...</td>
+<td>54</td>
+<td>0.048249</td>
+<td>0.001548</td>
+<td>0.001548</td>
+<td>...</td>
+<td>0.225889</td>
+<td>0.001548</td>
+<td>0.686992</td>
+<td>0.744404</td>
+<td>0.083935</td>
+<td>0.199393</td>
+<td>0.775350</td>
+<td>0.743736</td>
+<td>romantic</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>12</td>
+<td>giorgos papadopoulos</td>
+<td>apopse eida oneiro</td>
+<td>1950</td>
+<td>pop</td>
+<td>till darling till matter know till dream live ...</td>
+<td>48</td>
+<td>0.001350</td>
+<td>0.001350</td>
+<td>0.417772</td>
+<td>...</td>
+<td>0.068800</td>
+<td>0.001350</td>
+<td>0.291671</td>
+<td>0.646489</td>
+<td>0.975904</td>
+<td>0.000246</td>
+<td>0.597073</td>
+<td>0.394375</td>
+<td>romantic</td>
+<td>1.0</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 31 columns</p>
+</div>
+</div>
+</div>
+<p>Here is a brief look at how many songs we have in each represented genre.</p>
+<div id="e2300648" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.groupby(<span class="st">"genre"</span>).size()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>genre
+blues      4604
+country    5445
+hip hop     904
+jazz       3845
+pop        7042
+reggae     2498
+rock       4034
+dtype: int64</code></pre>
+</div>
+</div>
+<p>This is a pretty large number of songs to classify… and some genres I personally dont care for. So, to make the dataframe more manageable and applicable to me personally, we are going to narrow down to only observe reggae, hip hop, rock and jazz.</p>
+<div id="aaaf27ad" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>genres <span class="op">=</span> {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hip hop"</span>   : <span class="dv">0</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"jazz"</span> : <span class="dv">1</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"reggae"</span> : <span class="dv">2</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rock"</span> : <span class="dv">3</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df[df[<span class="st">"genre"</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: x <span class="kw">in</span> genres.keys())]</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Unnamed: 0</th>
+<th data-quarto-table-cell-role="th">artist_name</th>
+<th data-quarto-table-cell-role="th">track_name</th>
+<th data-quarto-table-cell-role="th">release_date</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">lyrics</th>
+<th data-quarto-table-cell-role="th">len</th>
+<th data-quarto-table-cell-role="th">dating</th>
+<th data-quarto-table-cell-role="th">violence</th>
+<th data-quarto-table-cell-role="th">world/life</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">sadness</th>
+<th data-quarto-table-cell-role="th">feelings</th>
+<th data-quarto-table-cell-role="th">danceability</th>
+<th data-quarto-table-cell-role="th">loudness</th>
+<th data-quarto-table-cell-role="th">acousticness</th>
+<th data-quarto-table-cell-role="th">instrumentalness</th>
+<th data-quarto-table-cell-role="th">valence</th>
+<th data-quarto-table-cell-role="th">energy</th>
+<th data-quarto-table-cell-role="th">topic</th>
+<th data-quarto-table-cell-role="th">age</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">17091</td>
+<td>54304</td>
+<td>gene ammons</td>
+<td>it's the talk of the town</td>
+<td>1950</td>
+<td>jazz</td>
+<td>lovers sweethearts hard understand know happen...</td>
+<td>61</td>
+<td>0.001096</td>
+<td>0.001096</td>
+<td>0.001096</td>
+<td>...</td>
+<td>0.319570</td>
+<td>0.001096</td>
+<td>0.352323</td>
+<td>0.620388</td>
+<td>0.868474</td>
+<td>0.235830</td>
+<td>0.430132</td>
+<td>0.282260</td>
+<td>sadness</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">17092</td>
+<td>54305</td>
+<td>gene ammons</td>
+<td>you go to my head</td>
+<td>1950</td>
+<td>jazz</td>
+<td>head linger like haunt refrain spin round brai...</td>
+<td>48</td>
+<td>0.001754</td>
+<td>0.340964</td>
+<td>0.001754</td>
+<td>...</td>
+<td>0.001754</td>
+<td>0.001754</td>
+<td>0.379400</td>
+<td>0.638541</td>
+<td>0.907630</td>
+<td>0.900810</td>
+<td>0.221970</td>
+<td>0.184159</td>
+<td>violence</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">17093</td>
+<td>54307</td>
+<td>bud powell</td>
+<td>yesterdays</td>
+<td>1950</td>
+<td>jazz</td>
+<td>music speak start hear musicians like dizzy gi...</td>
+<td>107</td>
+<td>0.001144</td>
+<td>0.001144</td>
+<td>0.074762</td>
+<td>...</td>
+<td>0.001144</td>
+<td>0.097082</td>
+<td>0.489873</td>
+<td>0.467400</td>
+<td>0.992972</td>
+<td>0.927126</td>
+<td>0.334295</td>
+<td>0.228204</td>
+<td>music</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">17094</td>
+<td>54311</td>
+<td>tony bennett</td>
+<td>stranger in paradise</td>
+<td>1950</td>
+<td>jazz</td>
+<td>hand stranger paradise lose wonderland strange...</td>
+<td>41</td>
+<td>0.002105</td>
+<td>0.180524</td>
+<td>0.002105</td>
+<td>...</td>
+<td>0.527429</td>
+<td>0.002105</td>
+<td>0.179032</td>
+<td>0.559470</td>
+<td>0.983936</td>
+<td>0.001781</td>
+<td>0.086974</td>
+<td>0.235211</td>
+<td>sadness</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">17095</td>
+<td>54313</td>
+<td>dean martin</td>
+<td>zing-a zing-a zing boom</td>
+<td>1950</td>
+<td>jazz</td>
+<td>zinga zinga zinga zinga zinga zinga zinga zing...</td>
+<td>160</td>
+<td>0.001253</td>
+<td>0.001253</td>
+<td>0.001253</td>
+<td>...</td>
+<td>0.425721</td>
+<td>0.001253</td>
+<td>0.580851</td>
+<td>0.687409</td>
+<td>0.655622</td>
+<td>0.000000</td>
+<td>0.936109</td>
+<td>0.418400</td>
+<td>sadness</td>
+<td>1.0</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 31 columns</p>
+</div>
+</div>
+</div>
+<div id="bf486021" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"genre"</span>] <span class="op">=</span> df[<span class="st">"genre"</span>].<span class="bu">apply</span>(genres.get)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Unnamed: 0</th>
+<th data-quarto-table-cell-role="th">artist_name</th>
+<th data-quarto-table-cell-role="th">track_name</th>
+<th data-quarto-table-cell-role="th">release_date</th>
+<th data-quarto-table-cell-role="th">genre</th>
+<th data-quarto-table-cell-role="th">lyrics</th>
+<th data-quarto-table-cell-role="th">len</th>
+<th data-quarto-table-cell-role="th">dating</th>
+<th data-quarto-table-cell-role="th">violence</th>
+<th data-quarto-table-cell-role="th">world/life</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">sadness</th>
+<th data-quarto-table-cell-role="th">feelings</th>
+<th data-quarto-table-cell-role="th">danceability</th>
+<th data-quarto-table-cell-role="th">loudness</th>
+<th data-quarto-table-cell-role="th">acousticness</th>
+<th data-quarto-table-cell-role="th">instrumentalness</th>
+<th data-quarto-table-cell-role="th">valence</th>
+<th data-quarto-table-cell-role="th">energy</th>
+<th data-quarto-table-cell-role="th">topic</th>
+<th data-quarto-table-cell-role="th">age</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">17091</td>
+<td>54304</td>
+<td>gene ammons</td>
+<td>it's the talk of the town</td>
+<td>1950</td>
+<td>1</td>
+<td>lovers sweethearts hard understand know happen...</td>
+<td>61</td>
+<td>0.001096</td>
+<td>0.001096</td>
+<td>0.001096</td>
+<td>...</td>
+<td>0.319570</td>
+<td>0.001096</td>
+<td>0.352323</td>
+<td>0.620388</td>
+<td>0.868474</td>
+<td>0.235830</td>
+<td>0.430132</td>
+<td>0.282260</td>
+<td>sadness</td>
+<td>1.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">17092</td>
+<td>54305</td>
+<td>gene ammons</td>
+<td>you go to my head</td>
+<td>1950</td>
+<td>1</td>
+<td>head linger like haunt refrain spin round brai...</td>
+<td>48</td>
+<td>0.001754</td>
+<td>0.340964</td>
+<td>0.001754</td>
+<td>...</td>
+<td>0.001754</td>
+<td>0.001754</td>
+<td>0.379400</td>
+<td>0.638541</td>
+<td>0.907630</td>
+<td>0.900810</td>
+<td>0.221970</td>
+<td>0.184159</td>
+<td>violence</td>
+<td>1.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">17093</td>
+<td>54307</td>
+<td>bud powell</td>
+<td>yesterdays</td>
+<td>1950</td>
+<td>1</td>
+<td>music speak start hear musicians like dizzy gi...</td>
+<td>107</td>
+<td>0.001144</td>
+<td>0.001144</td>
+<td>0.074762</td>
+<td>...</td>
+<td>0.001144</td>
+<td>0.097082</td>
+<td>0.489873</td>
+<td>0.467400</td>
+<td>0.992972</td>
+<td>0.927126</td>
+<td>0.334295</td>
+<td>0.228204</td>
+<td>music</td>
+<td>1.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">17094</td>
+<td>54311</td>
+<td>tony bennett</td>
+<td>stranger in paradise</td>
+<td>1950</td>
+<td>1</td>
+<td>hand stranger paradise lose wonderland strange...</td>
+<td>41</td>
+<td>0.002105</td>
+<td>0.180524</td>
+<td>0.002105</td>
+<td>...</td>
+<td>0.527429</td>
+<td>0.002105</td>
+<td>0.179032</td>
+<td>0.559470</td>
+<td>0.983936</td>
+<td>0.001781</td>
+<td>0.086974</td>
+<td>0.235211</td>
+<td>sadness</td>
+<td>1.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">17095</td>
+<td>54313</td>
+<td>dean martin</td>
+<td>zing-a zing-a zing boom</td>
+<td>1950</td>
+<td>1</td>
+<td>zinga zinga zinga zinga zinga zinga zinga zing...</td>
+<td>160</td>
+<td>0.001253</td>
+<td>0.001253</td>
+<td>0.001253</td>
+<td>...</td>
+<td>0.425721</td>
+<td>0.001253</td>
+<td>0.580851</td>
+<td>0.687409</td>
+<td>0.655622</td>
+<td>0.000000</td>
+<td>0.936109</td>
+<td>0.418400</td>
+<td>sadness</td>
+<td>1.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">28367</td>
+<td>82447</td>
+<td>mack 10</td>
+<td>10 million ways</td>
+<td>2019</td>
+<td>0</td>
+<td>cause fuck leave scar tick tock clock come kno...</td>
+<td>78</td>
+<td>0.001350</td>
+<td>0.001350</td>
+<td>0.001350</td>
+<td>...</td>
+<td>0.065664</td>
+<td>0.001350</td>
+<td>0.889527</td>
+<td>0.759711</td>
+<td>0.062549</td>
+<td>0.000000</td>
+<td>0.751649</td>
+<td>0.695686</td>
+<td>obscene</td>
+<td>0.014286</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">28368</td>
+<td>82448</td>
+<td>m.o.p.</td>
+<td>ante up (robbin hoodz theory)</td>
+<td>2019</td>
+<td>0</td>
+<td>minks things chain ring braclets yap fame come...</td>
+<td>67</td>
+<td>0.001284</td>
+<td>0.001284</td>
+<td>0.035338</td>
+<td>...</td>
+<td>0.001284</td>
+<td>0.001284</td>
+<td>0.662082</td>
+<td>0.789580</td>
+<td>0.004607</td>
+<td>0.000002</td>
+<td>0.922712</td>
+<td>0.797791</td>
+<td>obscene</td>
+<td>0.014286</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">28369</td>
+<td>82449</td>
+<td>nine</td>
+<td>whutcha want?</td>
+<td>2019</td>
+<td>0</td>
+<td>get ban get ban stick crack relax plan attack ...</td>
+<td>77</td>
+<td>0.001504</td>
+<td>0.154302</td>
+<td>0.168988</td>
+<td>...</td>
+<td>0.001504</td>
+<td>0.001504</td>
+<td>0.663165</td>
+<td>0.726970</td>
+<td>0.104417</td>
+<td>0.000001</td>
+<td>0.838211</td>
+<td>0.767761</td>
+<td>obscene</td>
+<td>0.014286</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">28370</td>
+<td>82450</td>
+<td>will smith</td>
+<td>switch</td>
+<td>2019</td>
+<td>0</td>
+<td>check check yeah yeah hear thing call switch g...</td>
+<td>67</td>
+<td>0.001196</td>
+<td>0.001196</td>
+<td>0.001196</td>
+<td>...</td>
+<td>0.001196</td>
+<td>0.001196</td>
+<td>0.883028</td>
+<td>0.786888</td>
+<td>0.007027</td>
+<td>0.000503</td>
+<td>0.508450</td>
+<td>0.885882</td>
+<td>obscene</td>
+<td>0.014286</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">28371</td>
+<td>82451</td>
+<td>jeezy</td>
+<td>r.i.p.</td>
+<td>2019</td>
+<td>0</td>
+<td>remix killer alive remix thriller trap bitch s...</td>
+<td>83</td>
+<td>0.001012</td>
+<td>0.075202</td>
+<td>0.001012</td>
+<td>...</td>
+<td>0.001012</td>
+<td>0.033995</td>
+<td>0.828875</td>
+<td>0.674794</td>
+<td>0.015862</td>
+<td>0.000000</td>
+<td>0.475474</td>
+<td>0.492477</td>
+<td>obscene</td>
+<td>0.014286</td>
+</tr>
+</tbody>
+</table>
+
+<p>11281 rows × 31 columns</p>
+</div>
+</div>
+</div>
+<p>The base rate on our classification is the proportion of the data set occupied by the largest label class:</p>
+<div id="7065f720" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df.groupby(<span class="st">"genre"</span>).size() <span class="op">/</span> <span class="bu">len</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>genre
+0    0.080135
+1    0.340839
+2    0.221434
+3    0.357592
+dtype: float64</code></pre>
+</div>
+</div>
+<p>If we always guessed category 3, then we would expect an accuracy of roughly 36%. So, our task will be to see whether we can train a model to beat this.</p>
+<p>As we try to predict the genre of the track, we will use lyrics alongside some other engineered features (metadata) that we define below.</p>
+<div id="6bccea61" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>engineered_features <span class="op">=</span> [<span class="st">'dating'</span>, <span class="st">'violence'</span>, <span class="st">'world/life'</span>, <span class="st">'night/time'</span>,<span class="st">'shake the audience'</span>,<span class="st">'family/gospel'</span>, <span class="st">'romantic'</span>, <span class="st">'communication'</span>,<span class="st">'obscene'</span>, <span class="st">'music'</span>, <span class="st">'movement/places'</span>, <span class="st">'light/visual perceptions'</span>,<span class="st">'family/spiritual'</span>, <span class="st">'like/girls'</span>, <span class="st">'sadness'</span>, <span class="st">'feelings'</span>, <span class="st">'danceability'</span>,<span class="st">'loudness'</span>, <span class="st">'acousticness'</span>, <span class="st">'instrumentalness'</span>, <span class="st">'valence'</span>, <span class="st">'energy'</span>]      </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Our models will only need these engineered features, lyrics, and our target value which will be <em>genre</em> so we can throw them all into the same dataframe and use slicing to access different parts later.</p>
+<div id="e9e570cd" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df_clean<span class="op">=</span> df[engineered_features <span class="op">+</span> [<span class="st">'lyrics'</span>, <span class="st">'genre'</span>]].copy()</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>df_clean.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">dating</th>
+<th data-quarto-table-cell-role="th">violence</th>
+<th data-quarto-table-cell-role="th">world/life</th>
+<th data-quarto-table-cell-role="th">night/time</th>
+<th data-quarto-table-cell-role="th">shake the audience</th>
+<th data-quarto-table-cell-role="th">family/gospel</th>
+<th data-quarto-table-cell-role="th">romantic</th>
+<th data-quarto-table-cell-role="th">communication</th>
+<th data-quarto-table-cell-role="th">obscene</th>
+<th data-quarto-table-cell-role="th">music</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">sadness</th>
+<th data-quarto-table-cell-role="th">feelings</th>
+<th data-quarto-table-cell-role="th">danceability</th>
+<th data-quarto-table-cell-role="th">loudness</th>
+<th data-quarto-table-cell-role="th">acousticness</th>
+<th data-quarto-table-cell-role="th">instrumentalness</th>
+<th data-quarto-table-cell-role="th">valence</th>
+<th data-quarto-table-cell-role="th">energy</th>
+<th data-quarto-table-cell-role="th">lyrics</th>
+<th data-quarto-table-cell-role="th">genre</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">17091</td>
+<td>0.001096</td>
+<td>0.001096</td>
+<td>0.001096</td>
+<td>0.001096</td>
+<td>0.036316</td>
+<td>0.001096</td>
+<td>0.001096</td>
+<td>0.460773</td>
+<td>0.086498</td>
+<td>0.001096</td>
+<td>...</td>
+<td>0.319570</td>
+<td>0.001096</td>
+<td>0.352323</td>
+<td>0.620388</td>
+<td>0.868474</td>
+<td>0.235830</td>
+<td>0.430132</td>
+<td>0.282260</td>
+<td>lovers sweethearts hard understand know happen...</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">17092</td>
+<td>0.001754</td>
+<td>0.340964</td>
+<td>0.001754</td>
+<td>0.001754</td>
+<td>0.001754</td>
+<td>0.001754</td>
+<td>0.131872</td>
+<td>0.001754</td>
+<td>0.001754</td>
+<td>0.001754</td>
+<td>...</td>
+<td>0.001754</td>
+<td>0.001754</td>
+<td>0.379400</td>
+<td>0.638541</td>
+<td>0.907630</td>
+<td>0.900810</td>
+<td>0.221970</td>
+<td>0.184159</td>
+<td>head linger like haunt refrain spin round brai...</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">17093</td>
+<td>0.001144</td>
+<td>0.001144</td>
+<td>0.074762</td>
+<td>0.046173</td>
+<td>0.001144</td>
+<td>0.018789</td>
+<td>0.001144</td>
+<td>0.001655</td>
+<td>0.001144</td>
+<td>0.421734</td>
+<td>...</td>
+<td>0.001144</td>
+<td>0.097082</td>
+<td>0.489873</td>
+<td>0.467400</td>
+<td>0.992972</td>
+<td>0.927126</td>
+<td>0.334295</td>
+<td>0.228204</td>
+<td>music speak start hear musicians like dizzy gi...</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">17094</td>
+<td>0.002105</td>
+<td>0.180524</td>
+<td>0.002105</td>
+<td>0.002105</td>
+<td>0.002105</td>
+<td>0.002105</td>
+<td>0.002105</td>
+<td>0.201965</td>
+<td>0.002105</td>
+<td>0.002105</td>
+<td>...</td>
+<td>0.527429</td>
+<td>0.002105</td>
+<td>0.179032</td>
+<td>0.559470</td>
+<td>0.983936</td>
+<td>0.001781</td>
+<td>0.086974</td>
+<td>0.235211</td>
+<td>hand stranger paradise lose wonderland strange...</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">17095</td>
+<td>0.001253</td>
+<td>0.001253</td>
+<td>0.001253</td>
+<td>0.001253</td>
+<td>0.001253</td>
+<td>0.081126</td>
+<td>0.001253</td>
+<td>0.111951</td>
+<td>0.001253</td>
+<td>0.268737</td>
+<td>...</td>
+<td>0.425721</td>
+<td>0.001253</td>
+<td>0.580851</td>
+<td>0.687409</td>
+<td>0.655622</td>
+<td>0.000000</td>
+<td>0.936109</td>
+<td>0.418400</td>
+<td>zinga zinga zinga zinga zinga zinga zinga zing...</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 24 columns</p>
+</div>
+</div>
+</div>
+<p>Finally, we will perform a train-validation split to later evaluate our data</p>
+<div id="f5d16bf8" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>df_train, df_val <span class="op">=</span> train_test_split(df_clean,shuffle <span class="op">=</span> <span class="va">True</span>, test_size <span class="op">=</span> <span class="fl">0.2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="text-vectorization" class="level1">
+<h1>Text Vectorization</h1>
+<p>We now need to <em>vectorize</em> the lyrics. We’re going to use <strong>tokenization</strong> to break up the lyrics into a sequence of tokens, and then vectorize that sequence.</p>
+<p>We will be using a tokenizer imported from HuggingFace.</p>
+<div id="df0d265f" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> BertTokenizer.from_pretrained(<span class="st">"google-bert/bert-base-uncased"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For our purposes it’s more convenient to assign an <em>integer</em> to each token, which we can do like this:</p>
+<div id="a11810f1" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>encoded <span class="op">=</span> tokenizer(<span class="st">"I love reggae music!"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>encoded</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>{'input_ids': [101, 1045, 2293, 15662, 2189, 999, 102], 'token_type_ids': [0, 0, 0, 0, 0, 0, 0], 'attention_mask': [1, 1, 1, 1, 1, 1, 1]}</code></pre>
+</div>
+</div>
+<p>To do the reverse, we can use the <code>.decode</code> method of the tokenizer:</p>
+<div id="4e21097f" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>tokenizer.decode(encoded[<span class="st">"input_ids"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>'[CLS] i love reggae music! [SEP]'</code></pre>
+</div>
+</div>
+<p>Here is some code to help us prepare our dataset with encodings. A lot of our lyrics are different lengths so we will pad the shorter ones with 0s and truncate others that are especially long. We will make use of the torch <code>Dataset</code> class to help manage our data.</p>
+<div id="067e73fe" class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>max_len <span class="op">=</span> <span class="dv">512</span> <span class="co"># BERT capacity</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pad(l, max_len):</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="bu">len</span>(l) <span class="op">&lt;=</span> max_len</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    to_add <span class="op">=</span> max_len <span class="op">-</span> <span class="bu">len</span>(l)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> l <span class="op">+</span> [<span class="dv">0</span>]<span class="op">*</span>to_add</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> preprocess(df, tokenizer, max_len):</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># X = tokenizer(list(df["lyrics"]))["input_ids"]</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># X = [pad(t, max_len) for t in X]</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> tokenizer(<span class="bu">list</span>(df[<span class="st">"lyrics"</span>]), padding<span class="op">=</span><span class="st">"max_length"</span>, truncation<span class="op">=</span><span class="va">True</span>, max_length<span class="op">=</span>max_len)[<span class="st">"input_ids"</span>]</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> [x <span class="op">+</span> e <span class="cf">for</span> x, e <span class="kw">in</span> <span class="bu">zip</span>(X, df[engineered_features].values.tolist())]</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="bu">list</span>(df[<span class="st">"genre"</span>])</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X, y</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TextDataFromDF(Dataset):</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, df):</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.X, <span class="va">self</span>.y <span class="op">=</span> preprocess(df, tokenizer, max_len)</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, ix):</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.X[ix], <span class="va">self</span>.y[ix]</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>):</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Lets make our encoded datasets!</p>
+<div id="09224851" class="cell" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>train_data <span class="op">=</span> TextDataFromDF(df_train)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>val_data   <span class="op">=</span> TextDataFromDF(df_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here is what a single songs information looks like now:</p>
+<div id="ff257b8e" class="cell" data-execution_count="35">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> train_data[<span class="dv">1</span>]</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(X)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[101, 25237, 25237, 2645, 4682, 2264, 25237, 25237, 2681, 2215, 4536, 8795, 3524, 3524, 3233, 2954, 2655, 2655, 4151, 2455, 2489, 2954, 2204, 2954, 2903, 2157, 25237, 2935, 8391, 2954, 2204, 2954, 25237, 2935, 8391, 2233, 2233, 2455, 2188, 2709, 4828, 10497, 5358, 8739, 7195, 14318, 2015, 2264, 8135, 2272, 10689, 2907, 2152, 15908, 3426, 7354, 27524, 9895, 2368, 2574, 5510, 3886, 4781, 4125, 2892, 2455, 2954, 2204, 2954, 2903, 2157, 25237, 2935, 8391, 2954, 2204, 2954, 25237, 2935, 8391, 2645, 2645, 7354, 27524, 21038, 2015, 3582, 6750, 15834, 4536, 15834, 2954, 3696, 2892, 16579, 2015, 2563, 5000, 8391, 14437, 2668, 5472, 25237, 25237, 5722, 4562, 2925, 6225, 15616, 2954, 2204, 2954, 2903, 2157, 25237, 2935, 8391, 2954, 2204, 2954, 25237, 2935, 8391, 2272, 25237, 2645, 22825, 2954, 2204, 2954, 2903, 2157, 25237, 2935, 8391, 25237, 2935, 8391, 2954, 2204, 2954, 2903, 2157, 25237, 2935, 8391, 25237, 2935, 8391, 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0006662225501567, 0.3885539767840311, 0.1039642699113738, 0.1125086495754739, 0.0006662225253185, 0.1385745183743181, 0.0006662225963956, 0.000666222543954, 0.0006662225404265, 0.0006662225612787, 0.0496462185467528, 0.0006662225812354, 0.0831919481290733, 0.0006662225243746, 0.0006662225370302, 0.1018737873863844, 0.4021444817502437, 0.70771479116991, 0.0003744983679702, 0.0003613360323886, 0.3085325638911788, 0.6446335461127515]
+3</code></pre>
+</div>
+</div>
+<p>We are going to be feeding data in in batches, so we will need a dataloader which necessitates a collate function to ensure our we are imputing tensors of the right size.</p>
+<div id="a751a3bd" class="cell" data-execution_count="36">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> collate(data):</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> torch.tensor([d[<span class="dv">0</span>] <span class="cf">for</span> d <span class="kw">in</span> data])</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> torch.tensor([d[<span class="dv">1</span>] <span class="cf">for</span> d <span class="kw">in</span> data])</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X,y </span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(train_data, batch_size<span class="op">=</span><span class="dv">8</span>, shuffle<span class="op">=</span><span class="va">True</span>, collate_fn <span class="op">=</span> collate)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>val_loader <span class="op">=</span> DataLoader(val_data, batch_size<span class="op">=</span><span class="dv">8</span>, shuffle<span class="op">=</span><span class="va">True</span>, collate_fn <span class="op">=</span> collate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here is what a batch of data looks like. The predictor data is now a tensor in which the entries give token indices, padded with 0s and ending with the values of our engineered features. For visualization purposes we’ll show only the first 3 rows:</p>
+<div id="b18de88b" class="cell" data-execution_count="46">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(train_loader))</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>X[:<span class="dv">3</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="46">
+<pre><code>tensor([[1.0100e+02, 2.1890e+03, 2.3730e+03,  ..., 1.3462e-04, 9.3405e-01,
+         5.1550e-01],
+        [1.0100e+02, 2.3265e+04, 6.5460e+03,  ..., 2.9757e-03, 8.7428e-01,
+         4.4743e-01],
+        [1.0100e+02, 3.0420e+03, 4.3760e+03,  ..., 6.2348e-01, 5.2082e-01,
+         5.6155e-01]])</code></pre>
+</div>
+</div>
+<div id="13b5056f" class="cell" data-execution_count="47">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>y[:<span class="dv">3</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="47">
+<pre><code>tensor([2, 1, 1])</code></pre>
+</div>
+</div>
+</section>
+<section id="model-building" class="level1">
+<h1>Model Building</h1>
+<p>We are going to train <strong>three</strong> neural networks to classify our genres.</p>
+<ul>
+<li>Using Lyrics to Classify</li>
+<li>Using Engineered Features (Metadata) to Classify</li>
+<li>Using Lyrics and Metadata to Classify</li>
+</ul>
+<p>Lets build a model for classifying genres based on lyrics first.</p>
+<div id="aba4f4e1" class="cell" data-execution_count="53">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TextClassificationModel(nn.Module):</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>,vocab_size, embedding_dim, max_len, num_class):</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.embedding <span class="op">=</span> nn.Embedding(vocab_size<span class="op">+</span><span class="dv">1</span>, embedding_dim)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.fc <span class="op">=</span> nn.Linear(max_len<span class="op">*</span>embedding_dim, num_class)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.embedding(x)</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch.flatten(x, <span class="dv">1</span>)</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.fc(x)</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="ec0d5f4d" class="cell" data-execution_count="54">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>vocab_size <span class="op">=</span> <span class="bu">len</span>(tokenizer.vocab)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>embedding_dim <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>num_class <span class="op">=</span> <span class="bu">len</span>(genres)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>text_model <span class="op">=</span> TextClassificationModel(vocab_size, embedding_dim, max_len, num_class).to(device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="30b7a935" class="cell" data-execution_count="55">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>summary(text_model, input_Size <span class="op">=</span> (<span class="dv">8</span>, max_len))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="55">
+<pre><code>=================================================================
+Layer (type:depth-idx)                   Param #
+=================================================================
+TextClassificationModel                  --
+├─Embedding: 1-1                         305,230
+├─Linear: 1-2                            20,484
+=================================================================
+Total params: 325,714
+Trainable params: 325,714
+Non-trainable params: 0
+=================================================================</code></pre>
+</div>
+</div>
+<div id="cda0fbd9" class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(model, dataloader):</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span><span class="fl">.1</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    loss_fn <span class="op">=</span> torch.nn.CrossEntropyLoss()</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    epoch_start_time <span class="op">=</span> time.time()</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># keep track of some counts for measuring accuracy</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    total_acc, total_count <span class="op">=</span> <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> X, y <span class="kw">in</span> dataloader:</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>        <span class="co"># zero gradients</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># form prediction on batch</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>        predicted_label <span class="op">=</span> model(X)</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># evaluate loss on prediction</span></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> loss_fn(predicted_label, y)</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># compute gradient</span></span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>        loss.backward()</span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># take an optimization step</span></span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># for printing accuracy</span></span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>        total_acc   <span class="op">+=</span> (predicted_label.argmax(<span class="dv">1</span>) <span class="op">==</span> y).<span class="bu">sum</span>().item()</span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>        total_count <span class="op">+=</span> y.size(<span class="dv">0</span>)</span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f'| epoch </span><span class="sc">{</span>epoch<span class="sc">:3d}</span><span class="ss"> | train accuracy </span><span class="sc">{</span>total_acc<span class="op">/</span>total_count<span class="sc">:8.3f}</span><span class="ss"> | time: </span><span class="sc">{</span>time<span class="sc">.</span>time() <span class="op">-</span> epoch_start_time<span class="sc">:5.2f}</span><span class="ss">s'</span>)</span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> accuracy(model, dataloader):</span>
+<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a>    total_acc, total_count <span class="op">=</span> <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> X, y <span class="kw">in</span> dataloader:</span>
+<span id="cb32-34"><a href="#cb32-34" aria-hidden="true" tabindex="-1"></a>            predicted_label <span class="op">=</span> model(X)</span>
+<span id="cb32-35"><a href="#cb32-35" aria-hidden="true" tabindex="-1"></a>            total_acc <span class="op">+=</span> (predicted_label.argmax(<span class="dv">1</span>) <span class="op">==</span> y).<span class="bu">sum</span>().item()</span>
+<span id="cb32-36"><a href="#cb32-36" aria-hidden="true" tabindex="-1"></a>            total_count <span class="op">+=</span> y.size(<span class="dv">0</span>)</span>
+<span id="cb32-37"><a href="#cb32-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total_acc<span class="op">/</span>total_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
 </section>
