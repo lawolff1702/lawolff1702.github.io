@@ -164,7 +164,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div class="quarto-category">Natural Language Processing</div>
     <div class="quarto-category">Neural Networks</div>
     <div class="quarto-category">Deep Learning</div>
-    <div class="quarto-category">In Progress</div>
   </div>
   </div>
 
@@ -201,7 +200,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="abstract" class="level1">
 <h1>Abstract</h1>
-<p>– Enter Here –</p>
+<p>In this blog post, we explore a deep learning approach to predicting the genres of music tracks. We leverage both song lyrics and engineered metadata features. We tokenize the lyrics with a BERT tokenizer and make use of Spotify’s engineered audio–semantic features (e.g., acousticness, danceability, thematic tags). We implement three neural networks: a lyric-based model, a metadata-only network, and a combined network that uses both lyric embeddings and engineered features. We compare how our different models stack up against one another and our base rate to assess the success of our different approaches to genre prediction.</p>
 </section>
 <section id="data" class="level1">
 <h1>Data</h1>
@@ -1719,12 +1718,14 @@ Non-trainable params: 0
  3: 0.7046568627450981}</code></pre>
 </div>
 </div>
-<p>Curse you Jazz!</p>
+<p>Curse you Jazz! We are doing significant better on all the other genres apart from jazz. This may be because of jazz lyrics being slightly less theme driven combined with the atypical structure of jazz music. Maybe swing rhythms, tempo changes and odd time signatures don’t fit neatly into any given category along with the lyrics.</p>
 </section>
 </section>
 <section id="closing-remarks" class="level1">
 <h1>Closing Remarks</h1>
-<hr>
+<p>Through our explorations, our metadata-only model yielded the highest accuracy around 65%, our combined network was not far behind with around 62% accuracy, and trailing begin was a purely lyric based approach that achieved 56% accuracy. Despite their varying and somewhat low accuracies, all the model outperformed the base rate of 36%. We narrowed down our search space to only four genres, hip hop, jazz, reggae, and rock. Of these genres, we had the easiest time distinguishing rock and reggae, with jazz proving especially hard to nail down.</p>
+<p>This blogpost was obviously an exercise in crafting deep learning pipelines through applying themes we learned in readings and class (i.e.&nbsp;mean-pooling, non-linear activation functions, hidden layers, etc.) and simple trial and error. One large takeaway I had was that feature concatenation does not necessarily guarantee improved model accuracy, and in some cases can provide more noise than clarity to the model.</p>
+<p>Some possible continuations for this project could be to modify model depth and complexity, implement vocabulary thresholds, expand the number of genres we look at, etc.</p>
 
 
 </section>
