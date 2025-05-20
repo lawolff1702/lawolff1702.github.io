@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/Final Project Blog/main.html",
       "/posts/Deep Music Genre Classification/index.html",
       "/posts/Sparse Kernel Machines/index.html",
       "/posts/Implementing Logistic Regression/index.html",
